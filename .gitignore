@@ -1,0 +1,15 @@
+__pycache__/
+.idea/
+ignore_dir/
+unsorted_cases/
+sender_kit/
+static_save/
+eml_cases/
+
+sample_script/ascii-jar-master/
+sample_script/ascii-jar-master.zip
+sample_script/comp.py
+sample_script/compress.py
+
+.DS_Store
+test.py
