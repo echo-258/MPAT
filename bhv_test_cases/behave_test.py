@@ -9,6 +9,26 @@ test_cases = {
         ,
         "description": b"The simplest test case, just to test sending function."
     },
+    # if encoded sample is blocked in this case, it should not be used in following cases
+    "no_encoding": {
+        "data":
+            b"MIME-Version: 1.0\r\n"
+            b"Subject: no_encoding\r\n"
+            b"Content-Type: multipart/mixed; boundary=foo\r\n"
+            b"\r\n"
+            b"--foo\r\n"
+            b"Content-Type: text/plain\r\n"
+            b"\r\n"
+            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
+            b"--foo\r\n"
+            b"Content-Type: application/octet-stream; name=att\r\n"
+            b"Content-Disposition: attachment; filename=att\r\n"
+            b"\r\n"
+            b"<specified_payload_here>"
+            b"--foo--\r\n"
+        ,
+        "description": b""
+    },
 
     # lack of header ==============
     "no_disp": {
