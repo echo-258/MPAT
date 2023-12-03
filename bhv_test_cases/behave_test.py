@@ -52,6 +52,7 @@ test_cases = {
     },
 
     # multiple conflicting headers ===============
+    # Content-Transfer-Encoding
     "multiple_encoding_valid_prev": {
         "data":
             b"MIME-Version: 1.0\r\n"
@@ -94,10 +95,10 @@ test_cases = {
         ,
         "description": b""
     },
-    "multiple_encoding_xxx": {
+    "multiple_encoding_ftt": {
         "data":
             b"MIME-Version: 1.0\r\n"
-            b"Subject: multiple_encoding_xxx\r\n"
+            b"Subject: multiple_encoding_ftt\r\n"
             b"Content-Type: multipart/mixed; boundary=foo\r\n"
             b"\r\n"
             b"--foo\r\n"
@@ -110,6 +111,28 @@ test_cases = {
             b"Content-Transfer-Encoding: quoted-printable\r\n"
             b"Content-Transfer-Encoding: base64\r\n"
             b"Content-Transfer-Encoding: base64\r\n"
+            b"\r\n"
+            b"<specified_payload_here>"
+            b"--foo--\r\n"
+        ,
+        "description": b""
+    },
+    "multiple_encoding_ttf": {
+        "data":
+            b"MIME-Version: 1.0\r\n"
+            b"Subject: multiple_encoding_ttf\r\n"
+            b"Content-Type: multipart/mixed; boundary=foo\r\n"
+            b"\r\n"
+            b"--foo\r\n"
+            b"Content-Type: text/plain\r\n"
+            b"\r\n"
+            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
+            b"--foo\r\n"
+            b"Content-Type: application/octet-stream; name=att\r\n"
+            b"Content-Disposition: attachment; filename=att\r\n"
+            b"Content-Transfer-Encoding: base64\r\n"
+            b"Content-Transfer-Encoding: base64\r\n"
+            b"Content-Transfer-Encoding: quoted-printable\r\n"
             b"\r\n"
             b"<specified_payload_here>"
             b"--foo--\r\n"
@@ -131,6 +154,27 @@ test_cases = {
             b"Content-Disposition: attachment; filename=att\r\n"
             b"Content-Transfer-Encoding: xxxxxxx\r\n"
             b"Content-Transfer-Encoding: base64\r\n"
+            b"\r\n"
+            b"<specified_payload_here>"
+            b"--foo--\r\n"
+        ,
+        "description": b""
+    },
+    "multiple_encoding_valid_invalid": {
+        "data":
+            b"MIME-Version: 1.0\r\n"
+            b"Subject: multiple_encoding_valid_invalid\r\n"
+            b"Content-Type: multipart/mixed; boundary=foo\r\n"
+            b"\r\n"
+            b"--foo\r\n"
+            b"Content-Type: text/plain\r\n"
+            b"\r\n"
+            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
+            b"--foo\r\n"
+            b"Content-Type: application/octet-stream; name=att\r\n"
+            b"Content-Disposition: attachment; filename=att\r\n"
+            b"Content-Transfer-Encoding: base64\r\n"
+            b"Content-Transfer-Encoding: xxxxxxx\r\n"
             b"\r\n"
             b"<specified_payload_here>"
             b"--foo--\r\n"
@@ -217,7 +261,7 @@ test_cases = {
         ,
         "description": b""
     },
-
+    # Content-Type
     "multiple_type_header_valid_prev": {
         "data":
             b"MIME-Version: 1.0\r\n"
@@ -384,6 +428,7 @@ test_cases = {
     },
 
     # header & header values ================
+    # Content-Transfer-Encoding
     "space_before_CTE": {
         "data":
             b"MIME-Version: 1.0\r\n"
@@ -584,7 +629,92 @@ test_cases = {
         ,
         "description": b"Add extra \\0 after CTE value."
     },
-
+    # CTE - folding
+    "CTE_truncated_folding": {
+        "data":
+            b"MIME-Version: 1.0\r\n"
+            b"Subject: CTE_truncated_folding\r\n"
+            b"Content-Type: multipart/mixed; boundary=foo\r\n"
+            b"\r\n"
+            b"--foo\r\n"
+            b"Content-Type: text/plain\r\n"
+            b"\r\n"
+            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
+            b"--foo\r\n"
+            b"Content-Type: application/octet-stream; name=att\r\n"
+            b"Content-Transfer-Encoding: bas\r\n"
+            b" e64\r\n"
+            b"Content-Disposition: attachment; filename=att\r\n"
+            b"\r\n"
+            b"<specified_payload_here>"
+            b"--foo--\r\n"
+        ,
+        "description": b""
+    },
+    "CTE_colon_folding": {
+        "data":
+            b"MIME-Version: 1.0\r\n"
+            b"Subject: CTE_colon_folding\r\n"
+            b"Content-Type: multipart/mixed; boundary=foo\r\n"
+            b"\r\n"
+            b"--foo\r\n"
+            b"Content-Type: text/plain\r\n"
+            b"\r\n"
+            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
+            b"--foo\r\n"
+            b"Content-Type: application/octet-stream; name=att\r\n"
+            b"Content-Transfer-Encoding:\r\n"
+            b" base64\r\n"
+            b"Content-Disposition: attachment; filename=att\r\n"
+            b"\r\n"
+            b"<specified_payload_here>"
+            b"--foo--\r\n"
+        ,
+        "description": b""
+    },
+    "CTE_folding_colon": {
+        "data":
+            b"MIME-Version: 1.0\r\n"
+            b"Subject: CTE_folding_colon\r\n"
+            b"Content-Type: multipart/mixed; boundary=foo\r\n"
+            b"\r\n"
+            b"--foo\r\n"
+            b"Content-Type: text/plain\r\n"
+            b"\r\n"
+            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
+            b"--foo\r\n"
+            b"Content-Type: application/octet-stream; name=att\r\n"
+            b"Content-Transfer-Encoding\r\n"
+            b" :base64\r\n"
+            b"Content-Disposition: attachment; filename=att\r\n"
+            b"\r\n"
+            b"<specified_payload_here>"
+            b"--foo--\r\n"
+        ,
+        "description": b""
+    },
+    "CTE_comment_folding": {
+        "data":
+            b"MIME-Version: 1.0\r\n"
+            b"Subject: CTE_comment_folding\r\n"
+            b"Content-Type: multipart/mixed; boundary=foo\r\n"
+            b"\r\n"
+            b"--foo\r\n"
+            b"Content-Type: text/plain\r\n"
+            b"\r\n"
+            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
+            b"--foo\r\n"
+            b"Content-Type: application/octet-stream; name=att\r\n"
+            b"Content-Transfer-Encoding: bas(com\r\n"
+            b" ment)e64\r\n"
+            b"Content-Disposition: attachment; filename=att\r\n"
+            b"\r\n"
+            b"<specified_payload_here>"
+            b"--foo--\r\n"
+        ,
+        "description": b""
+    },
+    # Content-Type
     "space_before_type": {
         "data":
             b"MIME-Version: 1.0\r\n"
@@ -822,11 +952,11 @@ test_cases = {
         ,
         "description": b""
     },
-    "mul_type_header_overlap": {
+    "mp_type_header_overlap": {
         "data":
             b"MIME-Version: 1.0\r\n"
-            b"Subject: mul_type_header_overlap\r\n"
-            b"Content-Type:Content-Typemultipart/mixed; boundary=foo\r\n"
+            b"Subject: mp_type_header_overlap\r\n"
+            b"Content-Type:Content-Type:multipart/mixed; boundary=foo\r\n"
             b"\r\n"
             b"--foo\r\n"
             b"Content-Type: text/plain\r\n"
@@ -842,10 +972,10 @@ test_cases = {
         ,
         "description": b""
     },
-    "mul_type_value_overlap": {
+    "mp_type_value_overlap": {
         "data":
             b"MIME-Version: 1.0\r\n"
-            b"Subject: mul_type_value_overlap\r\n"
+            b"Subject: mp_type_value_overlap\r\n"
             b"Content-Type: multipart/mixedmultipart/mixed; boundary=foo\r\n"
             b"\r\n"
             b"--foo\r\n"
@@ -856,6 +986,26 @@ test_cases = {
             b"Content-Type: application/octet-stream; name=att\r\n"
             b"Content-Disposition: attachment; filename=att\r\n"
             b"Content-Transfer-Encoding: base64\r\n"
+            b"\r\n"
+            b"<specified_payload_here>"
+            b"--foo--\r\n"
+        ,
+        "description": b""
+    },
+    "CTE_header_overlap": {
+        "data":
+            b"MIME-Version: 1.0\r\n"
+            b"Subject: CTE_header_overlap\r\n"
+            b"Content-Type: multipart/mixed; boundary=foo\r\n"
+            b"\r\n"
+            b"--foo\r\n"
+            b"Content-Type: text/plain\r\n"
+            b"\r\n"
+            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
+            b"--foo\r\n"
+            b"Content-Type: application/octet-stream; name=att\r\n"
+            b"Content-Disposition: attachment; filename=att\r\n"
+            b"Content-Transfer-Encoding:Content-Transfer-Encoding:base64\r\n"
             b"\r\n"
             b"<specified_payload_here>"
             b"--foo--\r\n"
@@ -1064,10 +1214,10 @@ test_cases = {
         ,
         "description": b"Abnormal line break between headers."
     },
-    "abnormal_line_break_between_headers_r_c": {
+    "abnormal_line_break_between_headers_rc": {
         "data":
             b"MIME-Version: 1.0\r\n"
-            b"Subject: abnormal_line_break_between_headers_r_c_n\r\n"
+            b"Subject: abnormal_line_break_between_headers_rc\r\n"
             b"Content-Type: multipart/mixed; boundary=foo\r\n"
             b"\r\n"
             b"--foo\r\n"
@@ -1084,10 +1234,10 @@ test_cases = {
         ,
         "description": b"Abnormal line break between headers."
     },
-    "abnormal_line_break_between_headers_c_n": {
+    "abnormal_line_break_between_headers_cn": {
         "data":
             b"MIME-Version: 1.0\r\n"
-            b"Subject: abnormal_line_break_between_headers_c_n\r\n"
+            b"Subject: abnormal_line_break_between_headers_cn\r\n"
             b"Content-Type: multipart/mixed; boundary=foo\r\n"
             b"\r\n"
             b"--foo\r\n"
@@ -1104,10 +1254,10 @@ test_cases = {
         ,
         "description": b"Abnormal line break between headers."
     },
-    "abnormal_line_break_between_headers_r_c_n": {
+    "abnormal_line_break_between_headers_rcn": {
         "data":
             b"MIME-Version: 1.0\r\n"
-            b"Subject: abnormal_line_break_between_headers_r_c_n\r\n"
+            b"Subject: abnormal_line_break_between_headers_rcn\r\n"
             b"Content-Type: multipart/mixed; boundary=foo\r\n"
             b"\r\n"
             b"--foo\r\n"
@@ -1124,10 +1274,10 @@ test_cases = {
         ,
         "description": b"Abnormal line break between headers."
     },
-    "abnormal_line_break_between_headers_r_c_n_c": {
+    "abnormal_line_break_between_headers_rcnc": {
         "data":
             b"MIME-Version: 1.0\r\n"
-            b"Subject: abnormal_line_break_between_headers_r_c_n_c\r\n"
+            b"Subject: abnormal_line_break_between_headers_rcnc\r\n"
             b"Content-Type: multipart/mixed; boundary=foo\r\n"
             b"\r\n"
             b"--foo\r\n"
@@ -1138,6 +1288,27 @@ test_cases = {
             b"Content-Type: application/octet-stream; name=att\r\n"
             b"Content-Disposition: attachment; filename=att\r(\n)"
             b"Content-Transfer-Encoding: base64\r\n"
+            b"\r\n"
+            b"<specified_payload_here>"
+            b"--foo--\r\n"
+        ,
+        "description": b"Abnormal line break between headers."
+    },
+    "abnormal_line_break_between_headers_r_space": {
+        "data":
+            b"MIME-Version: 1.0\r\n"
+            b"Subject: abnormal_line_break_between_headers_r_space\r\n"
+            b"Content-Type: multipart/mixed; boundary=foo\r\n"
+            b"\r\n"
+            b"--foo\r\n"
+            b"Content-Type: text/plain\r\n"
+            b"\r\n"
+            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
+            b"--foo\r\n"
+            b"Content-Type: application/octet-stream; name=att\r\n"
+            b"Content-Disposition: attachment; filename=att\r "
+            b"Content-Transfer-Encoding: base64\r\n"
+            b"Content-ID: 3\r\n"
             b"\r\n"
             b"<specified_payload_here>"
             b"--foo--\r\n"
@@ -1165,10 +1336,10 @@ test_cases = {
         ,
         "description": b"Abnormal line break between headers."
     },
-    "abnormal_line_break_between_headers_r_n_c": {
+    "abnormal_line_break_between_headers_rnc": {
         "data":
             b"MIME-Version: 1.0\r\n"
-            b"Subject: abnormal_line_break_between_headers_r_n_c\r\n"
+            b"Subject: abnormal_line_break_between_headers_rnc\r\n"
             b"Content-Type: multipart/mixed; boundary=foo\r\n"
             b"\r\n"
             b"--foo\r\n"
@@ -1186,12 +1357,74 @@ test_cases = {
         ,
         "description": b""
     },
-
-    # folding ===================
-    "abnormal_line_break_between_headers_r_n_folding": {
+    # separation between headers - folding
+    "pre_CTE_r_n_folding": {
         "data":
             b"MIME-Version: 1.0\r\n"
-            b"Subject: abnormal_line_break_between_headers_r_n_folding\r\n"
+            b"Subject: pre_CTE_r_n_folding\r\n"
+            b"Content-Type: multipart/mixed; boundary=foo\r\n"
+            b"\r\n"
+            b"--foo\r\n"
+            b"Content-Type: text/plain\r\n"
+            b"\r\n"
+            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
+            b"--foo\r\n"
+            b"Content-Type: application/octet-stream; name=att\r\n"
+            b"Content-Disposition: attachment; filename=att\r\n"
+            b" Content-Transfer-Encoding: base64\r\n"
+            b"Content-ID: 3\r\n"
+            b"\r\n"
+            b"<specified_payload_here>"
+            b"--foo--\r\n"
+        ,
+        "description": b""
+    },
+    "pre_CTE_r_folding": {
+        "data":
+            b"MIME-Version: 1.0\r\n"
+            b"Subject: pre_CTE_r_folding\r\n"
+            b"Content-Type: multipart/mixed; boundary=foo\r\n"
+            b"\r\n"
+            b"--foo\r\n"
+            b"Content-Type: text/plain\r\n"
+            b"\r\n"
+            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
+            b"--foo\r\n"
+            b"Content-Type: application/octet-stream; name=att\r\n"
+            b"Content-Disposition: attachment; filename=att\r"
+            b" Content-Transfer-Encoding: base64\r\n"
+            b"Content-ID: 3\r\n"
+            b"\r\n"
+            b"<specified_payload_here>"
+            b"--foo--\r\n"
+        ,
+        "description": b""
+    },
+    "pre_CTE_n_folding": {
+        "data":
+            b"MIME-Version: 1.0\r\n"
+            b"Subject: pre_CTE_n_folding\r\n"
+            b"Content-Type: multipart/mixed; boundary=foo\r\n"
+            b"\r\n"
+            b"--foo\r\n"
+            b"Content-Type: text/plain\r\n"
+            b"\r\n"
+            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
+            b"--foo\r\n"
+            b"Content-Type: application/octet-stream; name=att\r\n"
+            b"Content-Disposition: attachment; filename=att\n"
+            b" Content-Transfer-Encoding: base64\r\n"
+            b"Content-ID: 3\r\n"
+            b"\r\n"
+            b"<specified_payload_here>"
+            b"--foo--\r\n"
+        ,
+        "description": b""
+    },
+    "post_CTE_r_n_folding": {
+        "data":
+            b"MIME-Version: 1.0\r\n"
+            b"Subject: post_CTE_r_n_folding\r\n"
             b"Content-Type: multipart/mixed; boundary=foo\r\n"
             b"\r\n"
             b"--foo\r\n"
@@ -1209,10 +1442,10 @@ test_cases = {
         ,
         "description": b""
     },
-    "abnormal_line_break_between_headers_r_folding": {
+    "post_CTE_r_folding": {
         "data":
             b"MIME-Version: 1.0\r\n"
-            b"Subject: abnormal_line_break_between_headers_r_folding\r\n"
+            b"Subject: post_CTE_r_folding\r\n"
             b"Content-Type: multipart/mixed; boundary=foo\r\n"
             b"\r\n"
             b"--foo\r\n"
@@ -1230,10 +1463,10 @@ test_cases = {
         ,
         "description": b""
     },
-    "abnormal_line_break_between_headers_n_folding": {
+    "post_CTE_n_folding": {
         "data":
             b"MIME-Version: 1.0\r\n"
-            b"Subject: abnormal_line_break_between_headers_n_folding\r\n"
+            b"Subject: post_CTE_n_folding\r\n"
             b"Content-Type: multipart/mixed; boundary=foo\r\n"
             b"\r\n"
             b"--foo\r\n"
@@ -1245,224 +1478,6 @@ test_cases = {
             b"Content-Disposition: attachment; filename=att\r\n"
             b"Content-Transfer-Encoding: base64\n"
             b" Content-ID: 3\r\n"
-            b"\r\n"
-            b"<specified_payload_here>"
-            b"--foo--\r\n"
-        ,
-        "description": b""
-    },
-
-    "boundary_truncated_folding_app_half": {
-        "data":
-            b"MIME-Version: 1.0\r\n"
-            b"Subject: boundary_truncated_folding_app_half\r\n"
-            b"Content-Type: multipart/mixed; boundary=foo\r\n"
-            b" foo\r\n"
-            b"Content-ID: 3\r\n"
-            b"\r\n"
-            b"--foo\r\n"
-            b"Content-Type: text/plain\r\n"
-            b"\r\n"
-            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
-            b"--foo\r\n"
-            b"Content-Type: application/octet-stream; name=att\r\n"
-            b"Content-Disposition: attachment; filename=att\r\n"
-            b"Content-Transfer-Encoding: base64\r\n"
-            b"\r\n"
-            b"<specified_payload_here>"
-            b"--foo--\r\n"
-        ,
-        "description": b""
-    },
-    "boundary_truncated_folding_app_full": {
-        "data":
-            b"MIME-Version: 1.0\r\n"
-            b"Subject: boundary_truncated_folding_app_full\r\n"
-            b"Content-Type: multipart/mixed; boundary=foo\r\n"
-            b" foo\r\n"
-            b"Content-ID: 3\r\n"
-            b"\r\n"
-            b"--foofoo\r\n"
-            b"Content-Type: text/plain\r\n"
-            b"\r\n"
-            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
-            b"--foofoo\r\n"
-            b"Content-Type: application/octet-stream; name=att\r\n"
-            b"Content-Disposition: attachment; filename=att\r\n"
-            b"Content-Transfer-Encoding: base64\r\n"
-            b"\r\n"
-            b"<specified_payload_here>"
-            b"--foofoo--\r\n"
-        ,
-        "description": b""
-    },
-    "boundary_eq_folding": {
-        "data":
-            b"MIME-Version: 1.0\r\n"
-            b"Subject: boundary_eq_folding\r\n"
-            b"Content-Type: multipart/mixed; boundary=\r\n"
-            b" foofoo\r\n"
-            b"Content-ID: 3\r\n"
-            b"\r\n"
-            b"--foofoo\r\n"
-            b"Content-Type: text/plain\r\n"
-            b"\r\n"
-            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
-            b"--foofoo\r\n"
-            b"Content-Type: application/octet-stream; name=att\r\n"
-            b"Content-Disposition: attachment; filename=att\r\n"
-            b"Content-Transfer-Encoding: base64\r\n"
-            b"\r\n"
-            b"<specified_payload_here>"
-            b"--foofoo--\r\n"
-        ,
-        "description": b""
-    },
-    "boundary_eq_space_folding": {
-        "data":
-            b"MIME-Version: 1.0\r\n"
-            b"Subject: boundary_eq_space_folding\r\n"
-            b"Content-Type: multipart/mixed; boundary= \r\n"
-            b" foofoo\r\n"
-            b"Content-ID: 3\r\n"
-            b"\r\n"
-            b"--foofoo\r\n"
-            b"Content-Type: text/plain\r\n"
-            b"\r\n"
-            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
-            b"--foofoo\r\n"
-            b"Content-Type: application/octet-stream; name=att\r\n"
-            b"Content-Disposition: attachment; filename=att\r\n"
-            b"Content-Transfer-Encoding: base64\r\n"
-            b"\r\n"
-            b"<specified_payload_here>"
-            b"--foofoo--\r\n"
-        ,
-        "description": b""
-    },
-    "boundary_folding_eq": {
-        "data":
-            b"MIME-Version: 1.0\r\n"
-            b"Subject: boundary_folding_eq\r\n"
-            b"Content-Type: multipart/mixed; boundary\r\n"
-            b" =foofoo\r\n"
-            b"Content-ID: 3\r\n"
-            b"\r\n"
-            b"--foofoo\r\n"
-            b"Content-Type: text/plain\r\n"
-            b"\r\n"
-            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
-            b"--foofoo\r\n"
-            b"Content-Type: application/octet-stream; name=att\r\n"
-            b"Content-Disposition: attachment; filename=att\r\n"
-            b"Content-Transfer-Encoding: base64\r\n"
-            b"\r\n"
-            b"<specified_payload_here>"
-            b"--foofoo--\r\n"
-        ,
-        "description": b""
-    },
-    "boundary_space_folding_eq": {
-        "data":
-            b"MIME-Version: 1.0\r\n"
-            b"Subject: boundary_space_folding_eq\r\n"
-            b"Content-Type: multipart/mixed; boundary \r\n"
-            b" =foofoo\r\n"
-            b"Content-ID: 3\r\n"
-            b"\r\n"
-            b"--foofoo\r\n"
-            b"Content-Type: text/plain\r\n"
-            b"\r\n"
-            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
-            b"--foofoo\r\n"
-            b"Content-Type: application/octet-stream; name=att\r\n"
-            b"Content-Disposition: attachment; filename=att\r\n"
-            b"Content-Transfer-Encoding: base64\r\n"
-            b"\r\n"
-            b"<specified_payload_here>"
-            b"--foofoo--\r\n"
-        ,
-        "description": b""
-    },
-
-    "CTE_truncated_folding": {
-        "data":
-            b"MIME-Version: 1.0\r\n"
-            b"Subject: CTE_truncated_folding\r\n"
-            b"Content-Type: multipart/mixed; boundary=foo\r\n"
-            b"\r\n"
-            b"--foo\r\n"
-            b"Content-Type: text/plain\r\n"
-            b"\r\n"
-            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
-            b"--foo\r\n"
-            b"Content-Type: application/octet-stream; name=att\r\n"
-            b"Content-Transfer-Encoding: bas\r\n"
-            b" e64\r\n"
-            b"Content-Disposition: attachment; filename=att\r\n"
-            b"\r\n"
-            b"<specified_payload_here>"
-            b"--foo--\r\n"
-        ,
-        "description": b""
-    },
-    "CTE_colon_folding": {
-        "data":
-            b"MIME-Version: 1.0\r\n"
-            b"Subject: CTE_colon_folding\r\n"
-            b"Content-Type: multipart/mixed; boundary=foo\r\n"
-            b"\r\n"
-            b"--foo\r\n"
-            b"Content-Type: text/plain\r\n"
-            b"\r\n"
-            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
-            b"--foo\r\n"
-            b"Content-Type: application/octet-stream; name=att\r\n"
-            b"Content-Transfer-Encoding:\r\n"
-            b" base64\r\n"
-            b"Content-Disposition: attachment; filename=att\r\n"
-            b"\r\n"
-            b"<specified_payload_here>"
-            b"--foo--\r\n"
-        ,
-        "description": b""
-    },
-    "CTE_folding_colon": {
-        "data":
-            b"MIME-Version: 1.0\r\n"
-            b"Subject: CTE_folding_colon\r\n"
-            b"Content-Type: multipart/mixed; boundary=foo\r\n"
-            b"\r\n"
-            b"--foo\r\n"
-            b"Content-Type: text/plain\r\n"
-            b"\r\n"
-            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
-            b"--foo\r\n"
-            b"Content-Type: application/octet-stream; name=att\r\n"
-            b"Content-Transfer-Encoding\r\n"
-            b" :base64\r\n"
-            b"Content-Disposition: attachment; filename=att\r\n"
-            b"\r\n"
-            b"<specified_payload_here>"
-            b"--foo--\r\n"
-        ,
-        "description": b""
-    },
-    "CTE_comment_folding": {
-        "data":
-            b"MIME-Version: 1.0\r\n"
-            b"Subject: CTE_comment_folding\r\n"
-            b"Content-Type: multipart/mixed; boundary=foo\r\n"
-            b"\r\n"
-            b"--foo\r\n"
-            b"Content-Type: text/plain\r\n"
-            b"\r\n"
-            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
-            b"--foo\r\n"
-            b"Content-Type: application/octet-stream; name=att\r\n"
-            b"Content-Transfer-Encoding: bas(com\r\n"
-            b" ment)e64\r\n"
-            b"Content-Disposition: attachment; filename=att\r\n"
             b"\r\n"
             b"<specified_payload_here>"
             b"--foo--\r\n"
@@ -1554,66 +1569,6 @@ test_cases = {
         ,
         "description": b""
     },
-    "comma_bound_app_both": {
-        "data":
-            b"MIME-Version: 1.0\r\n"
-            b"Subject: comma_bound_app_both\r\n"
-            b"Content-Type: multipart/mixed; boundary=foo,faa\r\n"
-            b"\r\n"
-            b"--foo,faa\r\n"
-            b"Content-Type: text/plain\r\n"
-            b"\r\n"
-            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
-            b"--foo,faa\r\n"
-            b"Content-Type: application/octet-stream; name=att\r\n"
-            b"Content-Disposition: attachment; filename=att\r\n"
-            b"Content-Transfer-Encoding: base64\r\n"
-            b"\r\n"
-            b"<specified_payload_here>"
-            b"--foo,faa--\r\n"
-        ,
-        "description": b""
-    },
-    "comma_bound_app_prev": {
-        "data":
-            b"MIME-Version: 1.0\r\n"
-            b"Subject: comma_bound_app_prev\r\n"
-            b"Content-Type: multipart/mixed; boundary=foo,faa\r\n"
-            b"\r\n"
-            b"--foo\r\n"
-            b"Content-Type: text/plain\r\n"
-            b"\r\n"
-            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
-            b"--foo\r\n"
-            b"Content-Type: application/octet-stream; name=att\r\n"
-            b"Content-Disposition: attachment; filename=att\r\n"
-            b"Content-Transfer-Encoding: base64\r\n"
-            b"\r\n"
-            b"<specified_payload_here>"
-            b"--foo--\r\n"
-        ,
-        "description": b""
-    },
-    "comma_bound_app_latter": {
-        "data":
-            b"MIME-Version: 1.0\r\n"
-            b"Subject: comma_bound_app_latter\r\n"
-            b"Content-Type: multipart/mixed; boundary=foo,faa\r\n"
-            b"\r\n"
-            b"--faa\r\n"
-            b"Content-Type: text/plain\r\n"
-            b"\r\n"
-            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
-            b"--faa\r\n"
-            b"Content-Type: application/octet-stream; name=att\r\n"
-            b"Content-Disposition: attachment; filename=att\r\n"
-            b"Content-Transfer-Encoding: base64\r\n"
-            b"\r\n"
-            b"<specified_payload_here>"
-            b"--faa--\r\n"
-        ,
-        "description": b""
-    },
     "mul_bound_header_valid_prev_mix_app": {
         "data":
             b"MIME-Version: 1.0\r\n"
@@ -1700,7 +1655,68 @@ test_cases = {
         ,
         "description": b""
     },
-    # blank char / 0 in boundary
+    # comma in boundary
+    "comma_bound_app_both": {
+        "data":
+            b"MIME-Version: 1.0\r\n"
+            b"Subject: comma_bound_app_both\r\n"
+            b"Content-Type: multipart/mixed; boundary=foo,faa\r\n"
+            b"\r\n"
+            b"--foo,faa\r\n"
+            b"Content-Type: text/plain\r\n"
+            b"\r\n"
+            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
+            b"--foo,faa\r\n"
+            b"Content-Type: application/octet-stream; name=att\r\n"
+            b"Content-Disposition: attachment; filename=att\r\n"
+            b"Content-Transfer-Encoding: base64\r\n"
+            b"\r\n"
+            b"<specified_payload_here>"
+            b"--foo,faa--\r\n"
+        ,
+        "description": b""
+    },
+    "comma_bound_app_prev": {
+        "data":
+            b"MIME-Version: 1.0\r\n"
+            b"Subject: comma_bound_app_prev\r\n"
+            b"Content-Type: multipart/mixed; boundary=foo,faa\r\n"
+            b"\r\n"
+            b"--foo\r\n"
+            b"Content-Type: text/plain\r\n"
+            b"\r\n"
+            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
+            b"--foo\r\n"
+            b"Content-Type: application/octet-stream; name=att\r\n"
+            b"Content-Disposition: attachment; filename=att\r\n"
+            b"Content-Transfer-Encoding: base64\r\n"
+            b"\r\n"
+            b"<specified_payload_here>"
+            b"--foo--\r\n"
+        ,
+        "description": b""
+    },
+    "comma_bound_app_latter": {
+        "data":
+            b"MIME-Version: 1.0\r\n"
+            b"Subject: comma_bound_app_latter\r\n"
+            b"Content-Type: multipart/mixed; boundary=foo,faa\r\n"
+            b"\r\n"
+            b"--faa\r\n"
+            b"Content-Type: text/plain\r\n"
+            b"\r\n"
+            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
+            b"--faa\r\n"
+            b"Content-Type: application/octet-stream; name=att\r\n"
+            b"Content-Disposition: attachment; filename=att\r\n"
+            b"Content-Transfer-Encoding: base64\r\n"
+            b"\r\n"
+            b"<specified_payload_here>"
+            b"--faa--\r\n"
+        ,
+        "description": b""
+    },
+    # blank char / 0 before boundary
     "bound_begin_blank_char_sta": {
         "data":
             b"MIME-Version: 1.0\r\n"
@@ -1781,107 +1797,6 @@ test_cases = {
         ,
         "description": b"blank char at the beginning of separating boundary"
     },
-    "bound_begin_blank_char_app_begin": {
-        "data":
-            b"MIME-Version: 1.0\r\n"
-            b"Subject: bound_begin_blank_char_app_begin\r\n"
-            b"Content-Type: multipart/mixed; boundary=foo\r\n"
-            b"\r\n"
-            b" --foo\r\n"
-            b"Content-Type: text/plain\r\n"
-            b"\r\n"
-            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
-            b"--foo\r\n"
-            b"Content-Type: application/octet-stream; name=att\r\n"
-            b"Content-Disposition: attachment; filename=att\r\n"
-            b"Content-Transfer-Encoding: base64\r\n"
-            b"\r\n"
-            b"<specified_payload_here>"
-            b"--foo--\r\n"
-        ,
-        "description": b"blank char at the beginning of separating boundary"
-    },
-    "bound_begin_blank_char_app_sep": {
-        "data":
-            b"MIME-Version: 1.0\r\n"
-            b"Subject: bound_begin_blank_char_app_sep\r\n"
-            b"Content-Type: multipart/mixed; boundary=foo\r\n"
-            b"\r\n"
-            b"--foo\r\n"
-            b"Content-Type: text/plain\r\n"
-            b"\r\n"
-            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
-            b" --foo\r\n"
-            b"Content-Type: application/octet-stream; name=att\r\n"
-            b"Content-Disposition: attachment; filename=att\r\n"
-            b"Content-Transfer-Encoding: base64\r\n"
-            b"\r\n"
-            b"<specified_payload_here>"
-            b"--foo--\r\n"
-        ,
-        "description": b"blank char at the beginning of separating boundary"
-    },
-    "bound_begin_blank_char_app_end": {
-        "data":
-            b"MIME-Version: 1.0\r\n"
-            b"Subject: bound_begin_blank_char_app_end\r\n"
-            b"Content-Type: multipart/mixed; boundary=foo\r\n"
-            b"\r\n"
-            b"--foo\r\n"
-            b"Content-Type: text/plain\r\n"
-            b"\r\n"
-            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
-            b"--foo\r\n"
-            b"Content-Type: application/octet-stream; name=att\r\n"
-            b"Content-Disposition: attachment; filename=att\r\n"
-            b"Content-Transfer-Encoding: base64\r\n"
-            b"\r\n"
-            b"<specified_payload_here>"
-            b" --foo--\r\n"
-        ,
-        "description": b"blank char at the beginning of separating boundary"
-    },
-    "bound_end_blank_char_sta": {
-        "data":
-            b"MIME-Version: 1.0\r\n"
-            b"Subject: bound_end_blank_char_sta\r\n"
-            b"Content-Type: multipart/mixed; boundary=foo \r\n"
-            b"\r\n"
-            b"--foo\r\n"
-            b"Content-Type: text/plain\r\n"
-            b"\r\n"
-            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
-            b"--foo \r\n"
-            b"Content-Type: application/octet-stream; name=att\r\n"
-            b"Content-Disposition: attachment; filename=att\r\n"
-            b"Content-Transfer-Encoding: base64\r\n"
-            b"\r\n"
-            b"<specified_payload_here>"
-            b"--foo--\r\n"
-        ,
-        "description": b"blank char at the beginning of end boundary (statement & application)"
-    },
-    "bound_end_blank_char_app": {
-        "data":
-            b"MIME-Version: 1.0\r\n"
-            b"Subject: bound_end_blank_char_app\r\n"
-            b"Content-Type: multipart/mixed; boundary=foo\r\n"
-            b"\r\n"
-            b"--foo\r\n"
-            b"Content-Type: text/plain\r\n"
-            b"\r\n"
-            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
-            b"--foo \r\n"
-            b"Content-Type: application/octet-stream; name=att\r\n"
-            b"Content-Disposition: attachment; filename=att\r\n"
-            b"Content-Transfer-Encoding: base64\r\n"
-            b"\r\n"
-            b"<specified_payload_here>"
-            b"--foo--\r\n"
-        ,
-        "description": b"blank char at the end of separating boundary"
-    },
-
     "bound_begin_0_sta": {
         "data":
             b"MIME-Version: 1.0\r\n"
@@ -1962,47 +1877,7 @@ test_cases = {
         ,
         "description": b""
     },
-    "boundary_space_eq": {
-        "data":
-            b"MIME-Version: 1.0\r\n"
-            b"Subject: boundary_space_eq\r\n"
-            b"Content-Type: multipart/mixed; boundary =foo\r\n"
-            b"\r\n"
-            b"--foo\r\n"
-            b"Content-Type: text/plain\r\n"
-            b"\r\n"
-            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
-            b"--foo\r\n"
-            b"Content-Type: application/octet-stream; name=att\r\n"
-            b"Content-Disposition: attachment; filename=att\r\n"
-            b"Content-Transfer-Encoding: base64\r\n"
-            b"\r\n"
-            b"<specified_payload_here>"
-            b"--foo--\r\n"
-        ,
-        "description": b""
-    },
-    "boundary_0_eq": {
-        "data":
-            b"MIME-Version: 1.0\r\n"
-            b"Subject: boundary_0_eq\r\n"
-            b"Content-Type: multipart/mixed; boundary\0=foo\r\n"
-            b"\r\n"
-            b"--foo\r\n"
-            b"Content-Type: text/plain\r\n"
-            b"\r\n"
-            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
-            b"--foo\r\n"
-            b"Content-Type: application/octet-stream; name=att\r\n"
-            b"Content-Disposition: attachment; filename=att\r\n"
-            b"Content-Transfer-Encoding: base64\r\n"
-            b"\r\n"
-            b"<specified_payload_here>"
-            b"--foo--\r\n"
-        ,
-        "description": b""
-    },
-
+    # blank char in boundary
     "blank_char_within_bound_sta": {
         "data":
             b"MIME-Version: 1.0\r\n"
@@ -2361,7 +2236,342 @@ test_cases = {
         ,
         "description": b"null value for boundary para"
     },
+    "null_bound_semicolon": {
+        "data":
+            b"MIME-Version: 1.0\r\n"
+            b"Subject: null_bound_semicolon\r\n"
+            b"Content-Type: multipart/mixed; boundary=;\r\n"
+            b"\r\n"
+            b"--\r\n"
+            b"Content-Type: text/plain\r\n"
+            b"\r\n"
+            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
+            b"--\r\n"
+            b"\r\n"
+            b"Content-Type: application/octet-stream; name=att\r\n"
+            b"Content-Disposition: attachment; filename=att\r\n"
+            b"Content-Transfer-Encoding: base64\r\n"
+            b"\r\n"
+            b"<specified_payload_here>"
+            b"----\r\n"
+        ,
+        "description": b"null value for boundary para"
+    },
+    "null_bound_semicolon_app": {
+        "data":
+            b"MIME-Version: 1.0\r\n"
+            b"Subject: null_bound_semicolon_app\r\n"
+            b"Content-Type: multipart/mixed; boundary=;\r\n"
+            b"\r\n"
+            b"--;\r\n"
+            b"Content-Type: text/plain\r\n"
+            b"\r\n"
+            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
+            b"--;\r\n"
+            b"\r\n"
+            b"Content-Type: application/octet-stream; name=att\r\n"
+            b"Content-Disposition: attachment; filename=att\r\n"
+            b"Content-Transfer-Encoding: base64\r\n"
+            b"\r\n"
+            b"<specified_payload_here>"
+            b"--;--\r\n"
+        ,
+        "description": b"null value for boundary para"
+    },
+    "boundary_truncated_folding_app_half": {
+        "data":
+            b"MIME-Version: 1.0\r\n"
+            b"Subject: boundary_truncated_folding_app_half\r\n"
+            b"Content-Type: multipart/mixed; boundary=foo\r\n"
+            b" foo\r\n"
+            b"Content-ID: 3\r\n"
+            b"\r\n"
+            b"--foo\r\n"
+            b"Content-Type: text/plain\r\n"
+            b"\r\n"
+            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
+            b"--foo\r\n"
+            b"Content-Type: application/octet-stream; name=att\r\n"
+            b"Content-Disposition: attachment; filename=att\r\n"
+            b"Content-Transfer-Encoding: base64\r\n"
+            b"\r\n"
+            b"<specified_payload_here>"
+            b"--foo--\r\n"
+        ,
+        "description": b""
+    },
+    "boundary_truncated_folding_app_full": {
+        "data":
+            b"MIME-Version: 1.0\r\n"
+            b"Subject: boundary_truncated_folding_app_full\r\n"
+            b"Content-Type: multipart/mixed; boundary=foo\r\n"
+            b" foo\r\n"
+            b"Content-ID: 3\r\n"
+            b"\r\n"
+            b"--foofoo\r\n"
+            b"Content-Type: text/plain\r\n"
+            b"\r\n"
+            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
+            b"--foofoo\r\n"
+            b"Content-Type: application/octet-stream; name=att\r\n"
+            b"Content-Disposition: attachment; filename=att\r\n"
+            b"Content-Transfer-Encoding: base64\r\n"
+            b"\r\n"
+            b"<specified_payload_here>"
+            b"--foofoo--\r\n"
+        ,
+        "description": b""
+    },
+    "boundary_eq_folding": {
+        "data":
+            b"MIME-Version: 1.0\r\n"
+            b"Subject: boundary_eq_folding\r\n"
+            b"Content-Type: multipart/mixed; boundary=\r\n"
+            b" foofoo\r\n"
+            b"Content-ID: 3\r\n"
+            b"\r\n"
+            b"--foofoo\r\n"
+            b"Content-Type: text/plain\r\n"
+            b"\r\n"
+            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
+            b"--foofoo\r\n"
+            b"Content-Type: application/octet-stream; name=att\r\n"
+            b"Content-Disposition: attachment; filename=att\r\n"
+            b"Content-Transfer-Encoding: base64\r\n"
+            b"\r\n"
+            b"<specified_payload_here>"
+            b"--foofoo--\r\n"
+        ,
+        "description": b""
+    },
+    "boundary_eq_space_folding": {
+        "data":
+            b"MIME-Version: 1.0\r\n"
+            b"Subject: boundary_eq_space_folding\r\n"
+            b"Content-Type: multipart/mixed; boundary= \r\n"
+            b" foofoo\r\n"
+            b"Content-ID: 3\r\n"
+            b"\r\n"
+            b"--foofoo\r\n"
+            b"Content-Type: text/plain\r\n"
+            b"\r\n"
+            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
+            b"--foofoo\r\n"
+            b"Content-Type: application/octet-stream; name=att\r\n"
+            b"Content-Disposition: attachment; filename=att\r\n"
+            b"Content-Transfer-Encoding: base64\r\n"
+            b"\r\n"
+            b"<specified_payload_here>"
+            b"--foofoo--\r\n"
+        ,
+        "description": b""
+    },
+    "boundary_folding_eq": {
+        "data":
+            b"MIME-Version: 1.0\r\n"
+            b"Subject: boundary_folding_eq\r\n"
+            b"Content-Type: multipart/mixed; boundary\r\n"
+            b" =foofoo\r\n"
+            b"Content-ID: 3\r\n"
+            b"\r\n"
+            b"--foofoo\r\n"
+            b"Content-Type: text/plain\r\n"
+            b"\r\n"
+            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
+            b"--foofoo\r\n"
+            b"Content-Type: application/octet-stream; name=att\r\n"
+            b"Content-Disposition: attachment; filename=att\r\n"
+            b"Content-Transfer-Encoding: base64\r\n"
+            b"\r\n"
+            b"<specified_payload_here>"
+            b"--foofoo--\r\n"
+        ,
+        "description": b""
+    },
+    "boundary_space_folding_eq": {
+        "data":
+            b"MIME-Version: 1.0\r\n"
+            b"Subject: boundary_space_folding_eq\r\n"
+            b"Content-Type: multipart/mixed; boundary \r\n"
+            b" =foofoo\r\n"
+            b"Content-ID: 3\r\n"
+            b"\r\n"
+            b"--foofoo\r\n"
+            b"Content-Type: text/plain\r\n"
+            b"\r\n"
+            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
+            b"--foofoo\r\n"
+            b"Content-Type: application/octet-stream; name=att\r\n"
+            b"Content-Disposition: attachment; filename=att\r\n"
+            b"Content-Transfer-Encoding: base64\r\n"
+            b"\r\n"
+            b"<specified_payload_here>"
+            b"--foofoo--\r\n"
+        ,
+        "description": b""
+    },
+    # blank char in boundary line
+    "bound_begin_blank_char_app_begin": {
+        "data":
+            b"MIME-Version: 1.0\r\n"
+            b"Subject: bound_begin_blank_char_app_begin\r\n"
+            b"Content-Type: multipart/mixed; boundary=foo\r\n"
+            b"\r\n"
+            b" --foo\r\n"
+            b"Content-Type: text/plain\r\n"
+            b"\r\n"
+            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
+            b"--foo\r\n"
+            b"Content-Type: application/octet-stream; name=att\r\n"
+            b"Content-Disposition: attachment; filename=att\r\n"
+            b"Content-Transfer-Encoding: base64\r\n"
+            b"\r\n"
+            b"<specified_payload_here>"
+            b"--foo--\r\n"
+        ,
+        "description": b"blank char at the beginning of separating boundary"
+    },
+    "bound_begin_blank_char_app_sep": {
+        "data":
+            b"MIME-Version: 1.0\r\n"
+            b"Subject: bound_begin_blank_char_app_sep\r\n"
+            b"Content-Type: multipart/mixed; boundary=foo\r\n"
+            b"\r\n"
+            b"--foo\r\n"
+            b"Content-Type: text/plain\r\n"
+            b"\r\n"
+            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
+            b" --foo\r\n"
+            b"Content-Type: application/octet-stream; name=att\r\n"
+            b"Content-Disposition: attachment; filename=att\r\n"
+            b"Content-Transfer-Encoding: base64\r\n"
+            b"\r\n"
+            b"<specified_payload_here>"
+            b"--foo--\r\n"
+        ,
+        "description": b"blank char at the beginning of separating boundary"
+    },
+    "bound_begin_blank_char_app_end": {
+        "data":
+            b"MIME-Version: 1.0\r\n"
+            b"Subject: bound_begin_blank_char_app_end\r\n"
+            b"Content-Type: multipart/mixed; boundary=foo\r\n"
+            b"\r\n"
+            b"--foo\r\n"
+            b"Content-Type: text/plain\r\n"
+            b"\r\n"
+            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
+            b"--foo\r\n"
+            b"Content-Type: application/octet-stream; name=att\r\n"
+            b"Content-Disposition: attachment; filename=att\r\n"
+            b"Content-Transfer-Encoding: base64\r\n"
+            b"\r\n"
+            b"<specified_payload_here>"
+            b" --foo--\r\n"
+        ,
+        "description": b"blank char at the beginning of separating boundary"
+    },
+    "bound_end_blank_char_sta": {
+        "data":
+            b"MIME-Version: 1.0\r\n"
+            b"Subject: bound_end_blank_char_sta\r\n"
+            b"Content-Type: multipart/mixed; boundary=foo \r\n"
+            b"\r\n"
+            b"--foo\r\n"
+            b"Content-Type: text/plain\r\n"
+            b"\r\n"
+            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
+            b"--foo\r\n"
+            b"Content-Type: application/octet-stream; name=att\r\n"
+            b"Content-Disposition: attachment; filename=att\r\n"
+            b"Content-Transfer-Encoding: base64\r\n"
+            b"\r\n"
+            b"<specified_payload_here>"
+            b"--foo--\r\n"
+        ,
+        "description": b"blank char at the beginning of end boundary (statement & application)"
+    },
+    "terminating_bound_no_dash": {
+        "data":
+            b"MIME-Version: 1.0\r\n"
+            b"Subject: terminating_bound_no_dash\r\n"
+            b"Content-Type: multipart/mixed; boundary=foo\r\n"
+            b"\r\n"
+            b"--foo\r\n"
+            b"Content-Type: text/plain\r\n"
+            b"\r\n"
+            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
+            b"--foo\r\n"
+            b"Content-Type: application/octet-stream; name=att\r\n"
+            b"Content-Disposition: attachment; filename=att\r\n"
+            b"Content-Transfer-Encoding: base64\r\n"
+            b"\r\n"
+            b"<specified_payload_here>"
+            b"--foo\r\n"
+        ,
+        "description": b""
+    },
+    "bound_end_blank_char_app": {
+        "data":
+            b"MIME-Version: 1.0\r\n"
+            b"Subject: bound_end_blank_char_app\r\n"
+            b"Content-Type: multipart/mixed; boundary=foo\r\n"
+            b"\r\n"
+            b"--foo\r\n"
+            b"Content-Type: text/plain\r\n"
+            b"\r\n"
+            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
+            b"--foo \r\n"
+            b"Content-Type: application/octet-stream; name=att\r\n"
+            b"Content-Disposition: attachment; filename=att\r\n"
+            b"Content-Transfer-Encoding: base64\r\n"
+            b"\r\n"
+            b"<specified_payload_here>"
+            b"--foo--\r\n"
+        ,
+        "description": b"blank char at the end of separating boundary"
+    },
     # improper boundary statement
+    "boundary_space_eq": {
+        "data":
+            b"MIME-Version: 1.0\r\n"
+            b"Subject: boundary_space_eq\r\n"
+            b"Content-Type: multipart/mixed; boundary =foo\r\n"
+            b"\r\n"
+            b"--foo\r\n"
+            b"Content-Type: text/plain\r\n"
+            b"\r\n"
+            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
+            b"--foo\r\n"
+            b"Content-Type: application/octet-stream; name=att\r\n"
+            b"Content-Disposition: attachment; filename=att\r\n"
+            b"Content-Transfer-Encoding: base64\r\n"
+            b"\r\n"
+            b"<specified_payload_here>"
+            b"--foo--\r\n"
+        ,
+        "description": b""
+    },
+    "boundary_0_eq": {
+        "data":
+            b"MIME-Version: 1.0\r\n"
+            b"Subject: boundary_0_eq\r\n"
+            b"Content-Type: multipart/mixed; boundary\0=foo\r\n"
+            b"\r\n"
+            b"--foo\r\n"
+            b"Content-Type: text/plain\r\n"
+            b"\r\n"
+            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
+            b"--foo\r\n"
+            b"Content-Type: application/octet-stream; name=att\r\n"
+            b"Content-Disposition: attachment; filename=att\r\n"
+            b"Content-Transfer-Encoding: base64\r\n"
+            b"\r\n"
+            b"<specified_payload_here>"
+            b"--foo--\r\n"
+        ,
+        "description": b""
+    },
     "bound_para_no_semicolon": {
         "data":
             b"MIME-Version: 1.0\r\n"
@@ -2375,6 +2585,26 @@ test_cases = {
             b"--foo\r\n"
             b"\r\n"
             b"Content-Type: application/octet-stream; name=att\r\n"
+            b"Content-Disposition: attachment; filename=att\r\n"
+            b"Content-Transfer-Encoding: base64\r\n"
+            b"\r\n"
+            b"<specified_payload_here>"
+            b"--foo--\r\n"
+        ,
+        "description": b""
+    },
+    "wrong_bound_para": {
+        "data":
+            b"MIME-Version: 1.0\r\n"
+            b"Subject: wrong_bound_para\r\n"
+            b"Content-Type: multipart/mixed; bound=foo\r\n"
+            b"\r\n"
+            b"--foo\r\n"
+            b"Content-Type: text/plain\r\n"
+            b"\r\n"
+            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
+            b"--foo\r\n"
+            b"Content-Type: application/octet-stream; boundary=faa\r\n"
             b"Content-Disposition: attachment; filename=att\r\n"
             b"Content-Transfer-Encoding: base64\r\n"
             b"\r\n"
@@ -2403,6 +2633,51 @@ test_cases = {
         ,
         "description": b""
     },
+    "wrong_boundary": {
+        "data":
+            b"MIME-Version: 1.0\r\n"
+            b"Subject: wrong_boundary\r\n"
+            b"Content-Type: multipart/mixed; boundary=foo\r\n"
+            b"\r\n"
+            b"--faa\r\n"
+            b"Content-Type: text/plain\r\n"
+            b"\r\n"
+            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
+            b"--faa\r\n"
+            b"Content-Type: application/octet-stream; boundary=faa\r\n"
+            b"Content-Disposition: attachment; filename=att\r\n"
+            b"Content-Transfer-Encoding: base64\r\n"
+            b"\r\n"
+            b"<specified_payload_here>"
+            b"--faa--\r\n"
+        ,
+        "description": b""
+    },
+
+    "bound_encoding_composite_bypass": {
+        "possible_data":
+            b"MIME-Version: 1.0\r\n"
+            b"Subject: bound_encoding_composite_bypass\r\n"
+            b"Content-Type: multipart/mixed; boundary=(foo)1\r\n"
+            b"\r\n"
+            b"--(foo)1\r\n"
+            b"Content-Type: text/plain\r\n"
+            b"\r\n"
+            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
+            b"--(foo)1\r\n"
+            b"\r\n"
+            b"Content-Type: application/octet-stream; name=att\r\n"
+            b"Content-Disposition: attachment; filename=att\r\n"
+            b"Content-Transfer-Encoding: utf-7\r\n"
+            b"\r\n"
+            b"<specified_payload_here>"
+            b"--(foo)1--\r\n"
+        ,
+        "description": b"amavis failed to parse out the parts, delivering the entire email message to clamav. "
+                       b"clamav encounterd unknown encoding, and employed a default base64 decoding."
+    },
+
+    # Entity structure related ====================
     # boundary and entity
     "entity_r_bound": {
         "data":
@@ -2425,10 +2700,10 @@ test_cases = {
         ,
         "description": b""
     },
-    "entity_r_c_bound": {
+    "entity_rc_bound": {
         "data":
             b"MIME-Version: 1.0\r\n"
-            b"Subject: entity_r_c_bound\r\n"
+            b"Subject: entity_rc_bound\r\n"
             b"Content-Type: multipart/mixed; boundary=foo\r\n"
             b"\r\n"
             b"--foo\r\n"
@@ -2501,6 +2776,78 @@ test_cases = {
             b"--foo--\r\n"
         ,
         "description": b""
+    },
+    "blank_line_after_bound": {
+        "data":
+            b"MIME-Version: 1.0\r\n"
+            b"Subject: blank_line_after_bound\r\n"
+            b"Content-Type: multipart/mixed; boundary=foo\r\n"
+            b"\r\n"
+            b"--foo\r\n"
+            b"Content-Type: text/plain\r\n"
+            b"\r\n"
+            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
+            b"--foo\r\n"
+            b"\r\n"
+            b"Content-Type: application/octet-stream; name=att\r\n"
+            b"Content-Disposition: attachment; filename=att\r\n"
+            b"Content-Transfer-Encoding: base64\r\n"
+            b"\r\n"
+            b"<specified_payload_here>"
+            b"--foo--\r\n"
+        ,
+        "description": b"blank line between separating boundary and trailing entity"
+    },
+    # epilogue / preamble
+    "entity_outside_of_bound_preamble": {
+        "data":
+            b"MIME-Version: 1.0\r\n"
+            b"Subject: entity_outside_of_bound_preamble\r\n"
+            b"Content-Type: multipart/mixed; boundary=foo\r\n"
+            b"\r\n"
+            b"Content-Type: application/octet-stream; name=preamble_att\r\n"
+            b"Content-Disposition: attachment; filename=preamble_att\r\n"
+            b"Content-Transfer-Encoding: base64\r\n"
+            b"\r\n"
+            b"<specified_payload_here>"
+            b"--foo\r\n"
+            b"Content-Type: text/plain\r\n"
+            b"\r\n"
+            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
+            b"--foo\r\n"
+            b"Content-Type: application/octet-stream; name=att\r\n"
+            b"Content-Disposition: attachment; filename=att\r\n"
+            b"Content-Transfer-Encoding: quoted-printable\r\n"
+            b"\r\n"
+            b'Z=B2=12=E7w=3DP/=C3H*X$=F44?=85=930=FA=CA=F9=60=1Aqky+P=826=8F\r\n'
+            b"--foo--\r\n"
+        ,
+        "description": b"entity placed as preamble"
+    },
+    "entity_outside_of_bound_epilogue": {
+        "data":
+            b"MIME-Version: 1.0\r\n"
+            b"Subject: entity_outside_of_bound_epilogue\r\n"
+            b"Content-Type: multipart/mixed; boundary=foo\r\n"
+            b"\r\n"
+            b"--foo\r\n"
+            b"Content-Type: text/plain\r\n"
+            b"\r\n"
+            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
+            b"--foo\r\n"
+            b"Content-Type: application/octet-stream; name=att\r\n"
+            b"Content-Disposition: attachment; filename=att\r\n"
+            b"Content-Transfer-Encoding: quoted-printable\r\n"
+            b"\r\n"
+            b'Z=B2=12=E7w=3DP/=C3H*X$=F44?=85=930=FA=CA=F9=60=1Aqky+P=826=8F\r\n'
+            b"--foo--\r\n"
+            b"Content-Type: application/octet-stream; name=epilogue_att\r\n"
+            b"Content-Disposition: attachment; filename=epilogue_att\r\n"
+            b"Content-Transfer-Encoding: base64\r\n"
+            b"\r\n"
+            b"<specified_payload_here>"
+        ,
+        "description": b"entity placed as epilogue"
     },
     # nesting multipart
     "inner_using_outer_bound": {
@@ -2614,200 +2961,29 @@ test_cases = {
         ,
         "description": b""
     },
-
-    "bound_encoding_composite_bypass": {
-        "possible_data":
+    "deleted_inner_multipart_body": {
+        "data":
+            b"Subject: deleted_inner_multipart_body\r\n"
             b"MIME-Version: 1.0\r\n"
-            b"Subject: bound_encoding_composite_bypass\r\n"
-            b"Content-Type: multipart/mixed; boundary=(foo)1\r\n"
+            b"Content-Type: multipart/mixed; boundary=foo\r\n"
+            b"Content-ID: 1\r\n"
             b"\r\n"
-            b"--(foo)1\r\n"
-            b"Content-Type: text/plain\r\n"
+            b"--foo\r\n"
+            b"Content-Type: multipart/mixed; boundary=bar\r\n"
+            b"Content-ID: 2\r\n"
             b"\r\n"
-            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
-            b"--(foo)1\r\n"
             b"\r\n"
-            b"Content-Type: application/octet-stream; name=att\r\n"
+            b"--foo\r\n"
+            b"Content-Type: application/octet-stream\r\n"
+            b"Content-Transfer-Encoding: base64\r\n"
+            b"Content-ID: 5\r\n"
             b"Content-Disposition: attachment; filename=att\r\n"
-            b"Content-Transfer-Encoding: utf-7\r\n"
             b"\r\n"
             b"<specified_payload_here>"
-            b"--(foo)1--\r\n"
-        ,
-        "description": b"amavis failed to parse out the parts, delivering the entire email message to clamav. "
-                       b"clamav encounterd unknown encoding, and employed a default base64 decoding."
+            b"--foo--\r\n"
     },
-
     # header & body
-    "header_body_delimit_no_rn": {
-        "data":
-            b"MIME-Version: 1.0\r\n"
-            b"Subject: header_body_delimit_no_rn\r\n"
-            b"Content-Type: multipart/mixed; boundary=foo\r\n"
-            b"\r\n"
-            b"--foo\r\n"
-            b"Content-Type: text/plain\r\n"
-            b"\r\n"
-            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
-            b"--foo\r\n"
-            b"Content-Type: application/octet-stream; name=att\r\n"
-            b"Content-Disposition: attachment; filename=att\r\n"
-            b"Content-Transfer-Encoding: base64\r\n"
-            b"<specified_payload_here>"
-            b"--foo--\r\n"
-        ,
-        "description": b""
-    },
-    "header_body_delimit_rn_CTE_rn_body": {
-        "data":
-            b"MIME-Version: 1.0\r\n"
-            b"Subject: header_body_delimit_rn_CTE_rn_body\r\n"
-            b"Content-Type: multipart/mixed; boundary=foo\r\n"
-            b"\r\n"
-            b"--foo\r\n"
-            b"Content-Type: text/plain\r\n"
-            b"\r\n"
-            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
-            b"--foo\r\n"
-            b"Content-Type: application/octet-stream; name=att\r\n"
-            b"Content-Disposition: attachment; filename=att\r\n"
-            b"\r\n"
-            b"Content-Transfer-Encoding: base64\r\n"
-            b"\r\n"
-            b"<specified_payload_here>"
-            b"--foo--\r\n"
-        ,
-        "description": b""
-    },
-    "header_body_delimit_rn_CTE_body": {
-        "data":
-            b"MIME-Version: 1.0\r\n"
-            b"Subject: header_body_delimit_rn_CTE_body\r\n"
-            b"Content-Type: multipart/mixed; boundary=foo\r\n"
-            b"\r\n"
-            b"--foo\r\n"
-            b"Content-Type: text/plain\r\n"
-            b"\r\n"
-            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
-            b"--foo\r\n"
-            b"Content-Type: application/octet-stream; name=att\r\n"
-            b"Content-Disposition: attachment; filename=att\r\n"
-            b"\r\n"
-            b"Content-Transfer-Encoding: base64\r\n"
-            b"<specified_payload_here>"
-            b"--foo--\r\n"
-        ,
-        "description": b""
-    },
-    "header_body_delimit_rn_l_CTE_rn_body": {
-        "data":
-            b"MIME-Version: 1.0\r\n"
-            b"Subject: header_body_delimit_rn_l_CTE_rn_body\r\n"
-            b"Content-Type: multipart/mixed; boundary=foo\r\n"
-            b"\r\n"
-            b"--foo\r\n"
-            b"Content-Type: text/plain\r\n"
-            b"\r\n"
-            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
-            b"--foo\r\n"
-            b"Content-Type: application/octet-stream; name=att\r\n"
-            b"Content-Disposition: attachment; filename=att\r\n"
-            b"\r\n"
-            b"A meaningless sentence.\r\n"
-            b"Content-Transfer-Encoding: base64\r\n"
-            b"\r\n"
-            b"<specified_payload_here>"
-            b"--foo--\r\n"
-        ,
-        "description": b""
-    },
-    "header_body_delimit_rn_l_CTE_l_rn_body": {
-        "data":
-            b"MIME-Version: 1.0\r\n"
-            b"Subject: header_body_delimit_rn_l_CTE_l_rn_body\r\n"
-            b"Content-Type: multipart/mixed; boundary=foo\r\n"
-            b"\r\n"
-            b"--foo\r\n"
-            b"Content-Type: text/plain\r\n"
-            b"\r\n"
-            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
-            b"--foo\r\n"
-            b"Content-Type: application/octet-stream; name=att\r\n"
-            b"Content-Disposition: attachment; filename=att\r\n"
-            b"\r\n"
-            b"A meaningless sentence.\r\n"
-            b"Content-Transfer-Encoding: base64\r\n"
-            b"A meaningless sentence.\r\n"
-            b"\r\n"
-            b"<specified_payload_here>"
-            b"--foo--\r\n"
-        ,
-        "description": b""
-    },
-    "header_body_delimit_rn_l_CTE_l_body": {
-        "data":
-            b"MIME-Version: 1.0\r\n"
-            b"Subject: header_body_delimit_rn_l_CTE_l_body\r\n"
-            b"Content-Type: multipart/mixed; boundary=foo\r\n"
-            b"\r\n"
-            b"--foo\r\n"
-            b"Content-Type: text/plain\r\n"
-            b"\r\n"
-            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
-            b"--foo\r\n"
-            b"Content-Type: application/octet-stream; name=att\r\n"
-            b"Content-Disposition: attachment; filename=att\r\n"
-            b"\r\n"
-            b"A meaningless sentence.\r\n"
-            b"Content-Transfer-Encoding: base64\r\n"
-            b"A meaningless sentence.\r\n"
-            b"<specified_payload_here>"
-            b"--foo--\r\n"
-        ,
-        "description": b""
-    },
-    "header_body_delimit_rn_spaceCTE_rn_body": {
-        "data":
-            b"MIME-Version: 1.0\r\n"
-            b"Subject: header_body_delimit_rn_l_CTE_l_body\r\n"
-            b"Content-Type: multipart/mixed; boundary=foo\r\n"
-            b"\r\n"
-            b"--foo\r\n"
-            b"Content-Type: text/plain\r\n"
-            b"\r\n"
-            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
-            b"--foo\r\n"
-            b"Content-Type: application/octet-stream; name=att\r\n"
-            b"Content-Disposition: attachment; filename=att\r\n"
-            b"\r\n"
-            b" Content-Transfer-Encoding: base64\r\n"
-            b"\r\n"
-            b"<specified_payload_here>"
-            b"--foo--\r\n"
-        ,
-        "description": b""
-    },
-    "header_body_delimit_l_CTE_body": {
-        "data":
-            b"MIME-Version: 1.0\r\n"
-            b"Subject: header_body_delimit_rn_l_CTE_l_body\r\n"
-            b"Content-Type: multipart/mixed; boundary=foo\r\n"
-            b"\r\n"
-            b"--foo\r\n"
-            b"Content-Type: text/plain\r\n"
-            b"\r\n"
-            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
-            b"--foo\r\n"
-            b"Content-Type: application/octet-stream; name=att\r\n"
-            b"Content-Disposition: attachment; filename=att\r\n"
-            b"A meaningless sentence.\r\n"
-            b"Content-Transfer-Encoding: base64\r\n"
-            b"<specified_payload_here>"
-            b"--foo--\r\n"
-        ,
-        "description": b""
-    },
-
+    # simply modifying \r \n
     "header_body_delimit_rnr": {
         "data":
             b"MIME-Version: 1.0\r\n"
@@ -3068,7 +3244,7 @@ test_cases = {
         ,
         "description": b""
     },
-
+    # insert characters
     "header_body_delimit_crnrn": {
         "data":
             b"MIME-Version: 1.0\r\n"
@@ -3209,7 +3385,175 @@ test_cases = {
         ,
         "description": b""
     },
-
+    # where is the start of body?
+    "header_body_delimit_no_rn": {
+        "data":
+            b"MIME-Version: 1.0\r\n"
+            b"Subject: header_body_delimit_no_rn\r\n"
+            b"Content-Type: multipart/mixed; boundary=foo\r\n"
+            b"\r\n"
+            b"--foo\r\n"
+            b"Content-Type: text/plain\r\n"
+            b"\r\n"
+            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
+            b"--foo\r\n"
+            b"Content-Type: application/octet-stream; name=att\r\n"
+            b"Content-Disposition: attachment; filename=att\r\n"
+            b"Content-Transfer-Encoding: base64\r\n"
+            b"<specified_payload_here>"
+            b"--foo--\r\n"
+        ,
+        "description": b""
+    },
+    "header_body_delimit_rn_CTE_rn_body": {
+        "data":
+            b"MIME-Version: 1.0\r\n"
+            b"Subject: header_body_delimit_rn_CTE_rn_body\r\n"
+            b"Content-Type: multipart/mixed; boundary=foo\r\n"
+            b"\r\n"
+            b"--foo\r\n"
+            b"Content-Type: text/plain\r\n"
+            b"\r\n"
+            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
+            b"--foo\r\n"
+            b"Content-Type: application/octet-stream; name=att\r\n"
+            b"Content-Disposition: attachment; filename=att\r\n"
+            b"\r\n"
+            b"Content-Transfer-Encoding: base64\r\n"
+            b"\r\n"
+            b"<specified_payload_here>"
+            b"--foo--\r\n"
+        ,
+        "description": b""
+    },
+    "header_body_delimit_rn_CTE_body": {
+        "data":
+            b"MIME-Version: 1.0\r\n"
+            b"Subject: header_body_delimit_rn_CTE_body\r\n"
+            b"Content-Type: multipart/mixed; boundary=foo\r\n"
+            b"\r\n"
+            b"--foo\r\n"
+            b"Content-Type: text/plain\r\n"
+            b"\r\n"
+            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
+            b"--foo\r\n"
+            b"Content-Type: application/octet-stream; name=att\r\n"
+            b"Content-Disposition: attachment; filename=att\r\n"
+            b"\r\n"
+            b"Content-Transfer-Encoding: base64\r\n"
+            b"<specified_payload_here>"
+            b"--foo--\r\n"
+        ,
+        "description": b""
+    },
+    "header_body_delimit_rn_l_CTE_rn_body": {
+        "data":
+            b"MIME-Version: 1.0\r\n"
+            b"Subject: header_body_delimit_rn_l_CTE_rn_body\r\n"
+            b"Content-Type: multipart/mixed; boundary=foo\r\n"
+            b"\r\n"
+            b"--foo\r\n"
+            b"Content-Type: text/plain\r\n"
+            b"\r\n"
+            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
+            b"--foo\r\n"
+            b"Content-Type: application/octet-stream; name=att\r\n"
+            b"Content-Disposition: attachment; filename=att\r\n"
+            b"\r\n"
+            b"A meaningless sentence.\r\n"
+            b"Content-Transfer-Encoding: base64\r\n"
+            b"\r\n"
+            b"<specified_payload_here>"
+            b"--foo--\r\n"
+        ,
+        "description": b""
+    },
+    "header_body_delimit_rn_l_CTE_l_rn_body": {
+        "data":
+            b"MIME-Version: 1.0\r\n"
+            b"Subject: header_body_delimit_rn_l_CTE_l_rn_body\r\n"
+            b"Content-Type: multipart/mixed; boundary=foo\r\n"
+            b"\r\n"
+            b"--foo\r\n"
+            b"Content-Type: text/plain\r\n"
+            b"\r\n"
+            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
+            b"--foo\r\n"
+            b"Content-Type: application/octet-stream; name=att\r\n"
+            b"Content-Disposition: attachment; filename=att\r\n"
+            b"\r\n"
+            b"A meaningless sentence.\r\n"
+            b"Content-Transfer-Encoding: base64\r\n"
+            b"A meaningless sentence.\r\n"
+            b"\r\n"
+            b"<specified_payload_here>"
+            b"--foo--\r\n"
+        ,
+        "description": b""
+    },
+    "header_body_delimit_rn_l_CTE_l_body": {
+        "data":
+            b"MIME-Version: 1.0\r\n"
+            b"Subject: header_body_delimit_rn_l_CTE_l_body\r\n"
+            b"Content-Type: multipart/mixed; boundary=foo\r\n"
+            b"\r\n"
+            b"--foo\r\n"
+            b"Content-Type: text/plain\r\n"
+            b"\r\n"
+            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
+            b"--foo\r\n"
+            b"Content-Type: application/octet-stream; name=att\r\n"
+            b"Content-Disposition: attachment; filename=att\r\n"
+            b"\r\n"
+            b"A meaningless sentence.\r\n"
+            b"Content-Transfer-Encoding: base64\r\n"
+            b"A meaningless sentence.\r\n"
+            b"<specified_payload_here>"
+            b"--foo--\r\n"
+        ,
+        "description": b""
+    },
+    "header_body_delimit_rn_spaceCTE_rn_body": {
+        "data":
+            b"MIME-Version: 1.0\r\n"
+            b"Subject: header_body_delimit_rn_l_CTE_l_body\r\n"
+            b"Content-Type: multipart/mixed; boundary=foo\r\n"
+            b"\r\n"
+            b"--foo\r\n"
+            b"Content-Type: text/plain\r\n"
+            b"\r\n"
+            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
+            b"--foo\r\n"
+            b"Content-Type: application/octet-stream; name=att\r\n"
+            b"Content-Disposition: attachment; filename=att\r\n"
+            b"\r\n"
+            b" Content-Transfer-Encoding: base64\r\n"
+            b"\r\n"
+            b"<specified_payload_here>"
+            b"--foo--\r\n"
+        ,
+        "description": b""
+    },
+    "header_body_delimit_l_CTE_body": {
+        "data":
+            b"MIME-Version: 1.0\r\n"
+            b"Subject: header_body_delimit_rn_l_CTE_l_body\r\n"
+            b"Content-Type: multipart/mixed; boundary=foo\r\n"
+            b"\r\n"
+            b"--foo\r\n"
+            b"Content-Type: text/plain\r\n"
+            b"\r\n"
+            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
+            b"--foo\r\n"
+            b"Content-Type: application/octet-stream; name=att\r\n"
+            b"Content-Disposition: attachment; filename=att\r\n"
+            b"A meaningless sentence.\r\n"
+            b"Content-Transfer-Encoding: base64\r\n"
+            b"<specified_payload_here>"
+            b"--foo--\r\n"
+        ,
+        "description": b""
+    },
     "header_redundant_bl_r_n": {
         "data":
             b"MIME-Version: 1.0\r\n"
@@ -3272,100 +3616,6 @@ test_cases = {
             b"--foo--\r\n"
         ,
         "description": b""
-    },
-
-    # entity ====================
-    "blank_line_after_bound": {
-        "data":
-            b"MIME-Version: 1.0\r\n"
-            b"Subject: blank_line_after_bound\r\n"
-            b"Content-Type: multipart/mixed; boundary=foo\r\n"
-            b"\r\n"
-            b"--foo\r\n"
-            b"Content-Type: text/plain\r\n"
-            b"\r\n"
-            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
-            b"--foo\r\n"
-            b"\r\n"
-            b"Content-Type: application/octet-stream; name=att\r\n"
-            b"Content-Disposition: attachment; filename=att\r\n"
-            b"Content-Transfer-Encoding: base64\r\n"
-            b"\r\n"
-            b"<specified_payload_here>"
-            b"--foo--\r\n"
-        ,
-        "description": b"blank line between separating boundary and trailing entity"
-    },
-    "entity_outside_of_bound_preamble": {
-        "data":
-            b"MIME-Version: 1.0\r\n"
-            b"Subject: entity_outside_of_bound_preamble\r\n"
-            b"Content-Type: multipart/mixed; boundary=foo\r\n"
-            b"\r\n"
-            b"Content-Type: application/octet-stream; name=preamble_att\r\n"
-            b"Content-Disposition: attachment; filename=preamble_att\r\n"
-            b"Content-Transfer-Encoding: base64\r\n"
-            b"\r\n"
-            b"<specified_payload_here>"
-            b"--foo\r\n"
-            b"Content-Type: text/plain\r\n"
-            b"\r\n"
-            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
-            b"--foo\r\n"
-            b"Content-Type: application/octet-stream; name=att\r\n"
-            b"Content-Disposition: attachment; filename=att\r\n"
-            b"Content-Transfer-Encoding: quoted-printable\r\n"
-            b"\r\n"
-            b'Z=B2=12=E7w=3DP/=C3H*X$=F44?=85=930=FA=CA=F9=60=1Aqky+P=826=8F\r\n'
-            b"--foo--\r\n"
-        ,
-        "description": b"entity placed as preamble"
-    },
-    "entity_outside_of_bound_epilogue": {
-        "data":
-            b"MIME-Version: 1.0\r\n"
-            b"Subject: entity_outside_of_bound_epilogue\r\n"
-            b"Content-Type: multipart/mixed; boundary=foo\r\n"
-            b"\r\n"
-            b"--foo\r\n"
-            b"Content-Type: text/plain\r\n"
-            b"\r\n"
-            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
-            b"--foo\r\n"
-            b"Content-Type: application/octet-stream; name=att\r\n"
-            b"Content-Disposition: attachment; filename=att\r\n"
-            b"Content-Transfer-Encoding: quoted-printable\r\n"
-            b"\r\n"
-            b'Z=B2=12=E7w=3DP/=C3H*X$=F44?=85=930=FA=CA=F9=60=1Aqky+P=826=8F\r\n'
-            b"--foo--\r\n"
-            b"Content-Type: application/octet-stream; name=epilogue_att\r\n"
-            b"Content-Disposition: attachment; filename=epilogue_att\r\n"
-            b"Content-Transfer-Encoding: base64\r\n"
-            b"\r\n"
-            b"<specified_payload_here>"
-        ,
-        "description": b"entity placed as epilogue"
-    },
-    "deleted_inner_multipart_body": {
-        "data":
-            b"Subject: deleted_inner_multipart_body\r\n"
-            b"MIME-Version: 1.0\r\n"
-            b"Content-Type: multipart/mixed; boundary=foo\r\n"
-            b"Content-ID: 1\r\n"
-            b"\r\n"
-            b"--foo\r\n"
-            b"Content-Type: multipart/mixed; boundary=bar\r\n"
-            b"Content-ID: 2\r\n"
-            b"\r\n"
-            b"\r\n"
-            b"--foo\r\n"
-            b"Content-Type: application/octet-stream\r\n"
-            b"Content-Transfer-Encoding: base64\r\n"
-            b"Content-ID: 5\r\n"
-            b"Content-Disposition: attachment; filename=att\r\n"
-            b"\r\n"
-            b"<specified_payload_here>"
-            b"--foo--\r\n"
     },
 
     # comment ===================
