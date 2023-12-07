@@ -1,7 +1,6 @@
 import os
 import re
 import time
-
 # import simplejson as json
 import argparse
 
@@ -9,6 +8,7 @@ import targets
 import utils
 # import test_cases.demo as cases
 import bhv_test_cases.behave_test as cases
+import bhv_test_cases.specific_payload as payload_cases
 import config
 from mail_sender import MailSender
 
@@ -173,7 +173,8 @@ def main():
         #                "qq_mail", "sina_mail"]
         target_list = ["gmail"]
         case_id_list = ["normal_msg"]
-        specified_payload = ["b64_normal_data", "b64_eicar"]
+        # specified_payload = ["b64_normal_data", "b64_eicar"]
+        specified_payload = payload_cases.specific_payload["b64_related"]["eicar"]
 
         specified_subject = None
         specified_encoding = ["base64"]
