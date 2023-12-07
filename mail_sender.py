@@ -1,6 +1,8 @@
 from socket import *
 import time
 import ssl
+import re
+import config
 import utils
 import base64
 
@@ -12,15 +14,17 @@ except ImportError:
 
 class MailSender(object):
     def __init__(self):
-        self.mail_server = ""
-        self.rcpt_to = ""
-        self.email_data = ""
-        self.helo = ""
-        self.mail_from = ""
+        self.mail_server = b""
+        self.rcpt_to = b""
+        self.email_data = b""
+        self.helo = b""
+        self.mail_from = b""
         self.starttls = False
 
         self.client_socket = None
         self.tls_socket = None
+
+        self.err_msg = ""
 
     def set_param(self, mail_server, rcpt_to, email_data, helo, mail_from, starttls=False):
         self.mail_server = mail_server
@@ -50,7 +54,7 @@ class MailSender(object):
 
         self.client_socket = client_socket
 
-    def send_smtp_cmds(self, client_socket, print_data):
+    def send_smtp_cmds(self, client_socket):
         client_socket.send(b"ehlo " + self.helo + b"\r\n")
         time.sleep(0.1)
         self.print_send_msg("ehlo " + self.helo.decode("utf-8") + "\r\n")
@@ -91,7 +95,7 @@ class MailSender(object):
 
         client_socket.send(self.email_data + b"\r\n.\r\n")
         time.sleep(0.1)
-        if print_data:
+        if config.disp_flag:
             try:
                 self.print_send_msg(self.email_data.decode("utf-8") + "\r\n.\r\n")
             except UnicodeDecodeError as e:
@@ -141,21 +145,27 @@ class MailSender(object):
                     break
             time.sleep(0.1)
         print("\033[0m")
+
+        pattern = re.compile(r"\b5\d{2}\b")
+        if re.search(pattern, msg):
+            self.err_msg += msg
         return msg
 
-    def send_email(self, print_data):
+    def send_email(self):
         self.establish_socket()
         try:
             if self.starttls == True:
-                self.send_smtp_cmds(self.tls_socket, print_data)
+                self.send_smtp_cmds(self.tls_socket)
                 self.send_quit_cmd(self.tls_socket)
             else:
-                self.send_smtp_cmds(self.client_socket, print_data)
+                self.send_smtp_cmds(self.client_socket)
                 self.send_quit_cmd(self.client_socket)
             self.close_socket()
         except Exception as e:
             import traceback
             traceback.print_exc()
+
+        return self.err_msg
 
     def __del__(self):
         self.close_socket()

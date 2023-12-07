@@ -4,10 +4,10 @@ import email.encoders as e_ecd
 import quopri
 from tqdm import tqdm
 
-raw_sample_path = r"../sample/eicar/eicar.zip"
-b64_sample_path = r"../sample/eicar/b64_eicar_zip"
-qp_sample_path = r"../sample/eicar/qp_eicar_zip"
-basic_qp_path = r"../sample/eicar/basic_qp_eicar_zip"
+raw_sample_path = r"../sample/wannacry/Ransom.WannaCryptor"
+b64_sample_path = r"../sample/wannacry/b64_wncr"
+qp_sample_path = r"../sample/wannacry/"
+basic_qp_path = r"../sample/wannacry/basic_qp_wncr"
 
 MAX_LINE_LEN = 76
 
@@ -53,7 +53,13 @@ def qp_encode_sample():
 def basic_qp_encode_sample():
     with open(raw_sample_path, "rb") as raw_fp:
         sample_content = raw_fp.read()
+    basic_qp_content = basic_qp_encode_bytes(sample_content)
+    with open(basic_qp_path, "wb") as basic_qp_fp:
+        basic_qp_fp.write(basic_qp_content)
+        basic_qp_fp.write(b"\r\n")
 
+
+def basic_qp_encode_bytes(sample_content: bytes, disp=False):
     line_buf = ""
     lines = []
     for b in tqdm(sample_content):
@@ -61,14 +67,15 @@ def basic_qp_encode_sample():
         if len(line_buf) >= 75:
             lines.append(bytes(line_buf, "utf-8"))
             line_buf = ""
-    if len(line_buf) > 0:       # final line, incomplete
+    if len(line_buf) > 0:  # final line, incomplete
         lines.append(bytes(line_buf, "utf-8"))
-    basic_qp_content = b"=\r\n".join(lines)
-    with open(basic_qp_path, "wb") as basic_qp_fp:
-        basic_qp_fp.write(basic_qp_content)
-        basic_qp_fp.write(b"\r\n")
+    # basic_qp_content = b"=\r\n".join(lines)
+    if disp:
+        print(b"=\r\n".join(lines))
+    return b"=\r\n".join(lines)
 
-
-b64_encode_sample()
-qp_encode_sample()
-basic_qp_encode_sample()
+if __name__ == "__main__":
+    # b64_encode_sample()
+    # qp_encode_sample()
+    basic_qp_encode_sample()
+    # basic_qp_encode_bytes(b"Virus_Content", disp=True)

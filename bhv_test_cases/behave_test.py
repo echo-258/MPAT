@@ -10,7 +10,7 @@ test_cases = {
         "description": b"The simplest test case, just to test sending function."
     },
     # if encoded sample is blocked in this case, it should not be used in following cases
-    "no_encoding": {
+    "generic_no_encoding": {
         "data":
             b"MIME-Version: 1.0\r\n"
             b"Subject: no_encoding\r\n"
@@ -29,6 +29,28 @@ test_cases = {
         ,
         "description": b""
     },
+    # need to specify Subject and Content-Transfer-Encoding
+    "generic_structure": {
+        "data":
+            b"MIME-Version: 1.0\r\n"
+            b"Subject: <specified_Subject_here>\r\n"
+            b"Content-Type: multipart/mixed; boundary=foo\r\n"
+            b"\r\n"
+            b"--foo\r\n"
+            b"Content-Type: text/plain\r\n"
+            b"\r\n"
+            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
+            b"--foo\r\n"
+            b"Content-Type: application/octet-stream; name=att\r\n"
+            b"Content-Disposition: attachment; filename=att\r\n"
+            b"Content-Transfer-Encoding: <specified_CTE_here>\r\n"
+            b"\r\n"
+            b"<specified_payload_here>"
+            b"--foo--\r\n"
+        ,
+        "description": b""
+    },
+
 
     # lack of header ==============
     "no_disp": {
@@ -2184,7 +2206,6 @@ test_cases = {
             b"\r\n"
             b"Email with an attachment.\r\nThis is the main body text part.\r\n"
             b"--\r\n"
-            b"\r\n"
             b"Content-Type: application/octet-stream; name=att\r\n"
             b"Content-Disposition: attachment; filename=att\r\n"
             b"Content-Transfer-Encoding: base64\r\n"
@@ -2205,7 +2226,6 @@ test_cases = {
             b"\r\n"
             b"Email with an attachment.\r\nThis is the main body text part.\r\n"
             b"--\r\n"
-            b"\r\n"
             b"Content-Type: application/octet-stream; name=att\r\n"
             b"Content-Disposition: attachment; filename=att\r\n"
             b"Content-Transfer-Encoding: base64\r\n"
@@ -2226,7 +2246,6 @@ test_cases = {
             b"\r\n"
             b"Email with an attachment.\r\nThis is the main body text part.\r\n"
             b"--\r\n"
-            b"\r\n"
             b"Content-Type: application/octet-stream; name=att\r\n"
             b"Content-Disposition: attachment; filename=att\r\n"
             b"Content-Transfer-Encoding: base64\r\n"
@@ -3279,6 +3298,26 @@ test_cases = {
             b"Content-Type: application/octet-stream; name=att\r\n"
             b"Content-Transfer-Encoding: base64\r\n"
             b"Content-Disposition: attachment; filename=att(\r\n)"
+            b"\r\n"
+            b"<specified_payload_here>"
+            b"--foo--\r\n"
+        ,
+        "description": b""
+    },
+    "header_body_delimit_cnrn": {
+        "data":
+            b"MIME-Version: 1.0\r\n"
+            b"Subject: header_body_delimit_cnrn\r\n"
+            b"Content-Type: multipart/mixed; boundary=foo\r\n"
+            b"\r\n"
+            b"--foo\r\n"
+            b"Content-Type: text/plain\r\n"
+            b"\r\n"
+            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
+            b"--foo\r\n"
+            b"Content-Type: application/octet-stream; name=att\r\n"
+            b"Content-Transfer-Encoding: base64\r\n"
+            b"Content-Disposition: attachment; filename=att(\n"
             b"\r\n"
             b"<specified_payload_here>"
             b"--foo--\r\n"

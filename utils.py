@@ -1,3 +1,4 @@
+import os
 import config
 from time import gmtime, strftime
 
@@ -28,17 +29,29 @@ def convert_binfile_to_bytes():
                 line = line[:-1]
             print("b\"" + str(line) + r"\r\n" + "\"")
 
+
 def print_warning(msg):
     print("\033[93m%s\033[0m" % msg)
 
 
+def get_payload(specified_payload):
+    rp = config.payload_root_path
+    # search for file with specified payload name
+    payload_path = None
+    for root, dirs, files in os.walk(rp):
+        for file in files:
+            if file == specified_payload:
+                payload_path = os.path.join(root, file)
+
+    if payload_path is None:
+        print_warning("payload not found")
+        exit(-1)
+    with open(payload_path, "rb") as payload_fp:
+        payload = payload_fp.read()
+    return payload
+
+
 def insert_payload(msg_content, specified_payload):
-    # payload_token_dict = {
-    #     b"<This is b64_wannacry.>": r"./wannacry_sample/b64_wannacry",
-    #     b"<This is qp_wannacry.>": r"./wannacry_sample/qp_wannacry_1",
-    #     # b"<This is b64_wannacry.>": r"D:/repoPycharm/mailSender/wannacry_sample/b64_wannacry",
-    #     # b"<This is qp_wannacry.>": r"D:/repoPycharm/mailSender/wannacry_sample/qp_wannacry_1",
-    # }
     specify_payload_flag = b"<specified_payload_here>"
     flag_cnt = msg_content.count(specify_payload_flag)
     # default_payload = "b64_normal_data"
@@ -48,15 +61,27 @@ def insert_payload(msg_content, specified_payload):
         print_warning("invalid number of payloads specified")
         exit(-1)
     for i in range(flag_cnt):
-        msg_content = msg_content.replace(specify_payload_flag, b"<" + specified_payload[i].encode() + b">", 1)
+        payload = get_payload(specified_payload[i])
+        msg_content = msg_content.replace(specify_payload_flag, payload, 1)
+        # msg_content = msg_content.replace(specify_payload_flag, b"<" + specified_payload[i].encode() + b">", 1)
 
-    payload_token_dict = config.payload_token_dict
-
-    for token, payload_path in payload_token_dict.items():
-        if token in msg_content:
-            with open(payload_path, "rb") as payload_fp:
-                payload = payload_fp.read()
-            msg_content = msg_content.replace(token, payload)
-
+    # payload_token_dict = config.payload_token_dict
+    # for token, payload_path in payload_token_dict.items():
+    #     if token in msg_content:
+    #         with open(payload_path, "rb") as payload_fp:
+    #             payload = payload_fp.read()
+    #         msg_content = msg_content.replace(token, payload)
     return msg_content
+
+
+def construct_msg_content(msg, payload, subjcet=None, encoding=[]):
+    subject_flag = b"<specified_Subject_here>"
+    encoding_flag = b"<specified_CTE_here>"
+    if subjcet is not None:
+        msg = msg.replace(subject_flag, subjcet.encode())
+    if len(encoding) != 0:
+        for ecd in encoding:
+            msg = msg.replace(encoding_flag, ecd.encode())
+    msg_with_payload = insert_payload(msg, payload)
+    return msg_with_payload
 

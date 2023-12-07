@@ -1,3 +1,5 @@
+import os
+import re
 import time
 
 # import simplejson as json
@@ -5,15 +7,14 @@ import argparse
 
 import targets
 import utils
-import test_cases.demo as cases
-# import bhv_test_cases.behave_test as cases
+# import test_cases.demo as cases
+import bhv_test_cases.behave_test as cases
 import config
 from mail_sender import MailSender
 
 # from common.common import *
 # test_cases = testcases.test_cases
 # from exploits_builder import ExploitsBuilder
-config = config.config
 
 
 # def parser_error(errmsg):
@@ -64,9 +65,11 @@ def parse_args():
     parser.add_argument('-s', '--sender', default="vps3")
     parser.add_argument('-r', '--receiver', required=True, nargs='*')
 
-    parser.add_argument('-m', '--message', choices=["py", "eml"], default="py")
+    parser.add_argument('-m', '--msg_source', choices=["py", "eml", "payload"], default="py")
     parser.add_argument('-c', '--cases', default=["normal_msg"], nargs='*')
     parser.add_argument('-p', '--payload', default=[], nargs='*')
+    parser.add_argument('-j', '--subject', default=None)
+    parser.add_argument('-e', '--encoding', default=[], nargs='*')
 
     parser.add_argument('-d', '--display_data', action='store_true', default=False)
 
@@ -103,9 +106,9 @@ def parse_args():
 #         else:
 #             print("Sorry, case_id not found in testcases.")
 
-def execute_sending(sender_token, target_token, msg_main_content, disp_data=False):
+def execute_sending(sender_token, target_token, msg_main_content):
     mail_server = targets.target_mailbox[target_token]["mx"]
-    mail_server_port = config["mail_server_port"]
+    mail_server_port = config.mail_server_port
     smtp_header_hl = targets.helo_content[sender_token]
     smtp_header_mf = targets.sender[sender_token]
     smtp_header_rt = targets.target_mailbox[target_token]["receiver"]
@@ -114,20 +117,29 @@ def execute_sending(sender_token, target_token, msg_main_content, disp_data=Fals
     # exploits_builder = ExploitsBuilder(testcases.test_cases, config)
     # smtp_seqs = exploits_builder.generate_smtp_seqs()
 
-    spoof_auth = (b"Authentication-Results: mail10.nospoofing.cn; spf=pass smtp.mail=11011\r\n"
-                  b"\t0110@salesforce.com; dkim=pass header.i=@salesforce.com\r\n")
     from_header = b"From: " + smtp_header_mf + b"\r\n"
     to_header = b"To: " + smtp_header_rt + b"\r\n"
     date_header = b"Date: " + utils.get_date() + b"\r\n"
-    msg_content = spoof_auth + from_header + to_header + date_header + msg_main_content
+    msg_content = from_header + to_header + date_header + msg_main_content
 
     # msg_with_payload = utils.insert_payload(msg_content, specified_payload)
     mail_sender = MailSender()
     mail_sender.set_param((mail_server, mail_server_port), helo=smtp_header_hl, mail_from=smtp_header_mf,
                           rcpt_to=smtp_header_rt, email_data=msg_content)
-    mail_sender.send_email(print_data=disp_data)
+    err_msg = mail_sender.send_email()
+    if config.log_flag:
+        # get subject from main_content
+        subject = re.findall(b"Subject: (.*)\r\n", msg_content)[0]
+        with open(config.log_path, "a") as fp:
+            # write time
+            fp.write(time.strftime("%Y-%m-%d %H:%M:%S ", time.localtime()))
+            # write mf, rt, subject
+            fp.write("[" + smtp_header_mf.decode("utf-8") + " -> " + smtp_header_rt.decode("utf-8") + " " + subject.decode("utf-8") + "] ")
+            if err_msg == "":
+                fp.write("success\n")
+            else:
+                fp.write(err_msg + "\n")
     time.sleep(0.5)
-    # print("\""+target+"\",")
 
 
 def main():
@@ -144,21 +156,32 @@ def main():
 
     print("Start sending emails...")
 
-    sender_token = "meeting"
-    msg_source = "py"
+    sender_token = "vps3"
 
     if args_mode:
+        msg_source = args.msg_source
         disp_flag = args.display_data
         target_list = args.receiver
         case_id_list = args.cases
         specified_payload = args.payload
+        specified_subject = args.subject
+        specified_encoding = args.encoding
     else:
+        msg_source = "payload"
         disp_flag = True
         # target_list = ["gmail", "whu_email", "icloud", "mail_ru", "outlook", "mail_com", "protonmail", "netease_mail",
         #                "qq_mail", "sina_mail"]
-        target_list = ["DC_test_target"]
+        target_list = ["gmail"]
         case_id_list = ["normal_msg"]
-        specified_payload = []
+        specified_payload = ["b64_normal_data", "b64_eicar"]
+
+        specified_subject = None
+        specified_encoding = ["base64"]
+
+    if disp_flag:
+        config.disp_flag = True
+    if config.log_flag:
+        config.log_path = os.path.join(config.cur_path, "sender_log_" + time.strftime("%Y%m%d_%H%M%S", time.localtime()) + ".log")
 
     # first traverse all cases; then, for each case, test each target
     if msg_source == "py":
@@ -167,18 +190,29 @@ def main():
                 continue
             print("\033[94mtesting case: %s ...\n\033[0m" % case)
             msg_main_content = cases.test_cases[case]["data"]
-            msg_main_content_with_payload = utils.insert_payload(msg_main_content, specified_payload)
+            msg_main_content = utils.construct_msg_content(msg_main_content, specified_payload)
+            # msg_main_content_with_payload = utils.insert_payload(msg_main_content, specified_payload)
             for target in target_list:
                 print("\033[94mtesting target mailbox: %s ...\n\033[0m" % target)
-                execute_sending(sender_token, target, msg_main_content_with_payload, disp_flag)
-            time.sleep(2)
+                execute_sending(sender_token, target, msg_main_content)
+            time.sleep(1.5)
+    elif msg_source == "payload":
+        for pld in specified_payload:
+            print("\033[94mtesting payload: %s ...\n\033[0m" % pld)
+            msg_main_content = cases.test_cases["generic_structure"]["data"]
+            msg_main_content = utils.construct_msg_content(msg_main_content, [pld], pld, specified_encoding)
+            for target in target_list:
+                print("\033[94mtesting target mailbox: %s ...\n\033[0m" % target)
+                execute_sending(sender_token, target, msg_main_content)
+            time.sleep(1.5)
     elif msg_source == "eml":
         eml_path = ""
         msg_main_content = utils.get_main_content(eml_path)
-        msg_main_content_with_payload = utils.insert_payload(msg_main_content, specified_payload)
+        msg_main_content = utils.construct_msg_content(msg_main_content, specified_payload)
+        # msg_main_content_with_payload = utils.insert_payload(msg_main_content, specified_payload)
         for target in target_list:
             print("\033[94mtesting target mailbox: %s ...\n\033[0m" % target)
-            execute_sending(sender_token, target, msg_main_content_with_payload, disp_flag)
+            execute_sending(sender_token, target, msg_main_content)
 
     print("Finished.")
 
