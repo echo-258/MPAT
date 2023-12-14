@@ -4042,7 +4042,7 @@ test_cases = {
         ,
         "description": b"comment in boundary statement"
     },
-    "comment_boundasry_half_wrap_start_app_all": {
+    "comment_boundary_half_wrap_start_app_all": {
         "data":
             b"MIME-Version: 1.0\r\n"
             b"Subject: comment_boundary_half_wrap_start_app_all\r\n"
