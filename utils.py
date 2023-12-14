@@ -34,6 +34,10 @@ def print_warning(msg):
     print("\033[93m%s\033[0m" % msg)
 
 
+def print_hint(msg):
+    print("\033[92m%s\033[0m" % msg)
+
+
 def get_payload(specified_payload):
     rp = config.payload_root_path
     # search for file with specified payload name
@@ -74,14 +78,12 @@ def insert_payload(msg_content, specified_payload):
     return msg_content
 
 
-def construct_msg_content(msg, payload, subjcet=None, encoding=[]):
+def construct_msg_content(msg, payload, subjcet=None, encoding={}):
     subject_flag = b"<specified_Subject_here>"
-    encoding_flag = b"<specified_CTE_here>"
     if subjcet is not None:
         msg = msg.replace(subject_flag, subjcet.encode())
-    if len(encoding) != 0:
-        for ecd in encoding:
-            msg = msg.replace(encoding_flag, ecd.encode())
+    for ecd_label, ecd in encoding.items():
+        msg = msg.replace(ecd_label.encode(), ecd.encode())
     msg_with_payload = insert_payload(msg, payload)
     return msg_with_payload
 

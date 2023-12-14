@@ -95,9 +95,17 @@ class MailSender(object):
 
         client_socket.send(self.email_data + b"\r\n.\r\n")
         time.sleep(0.1)
-        if config.disp_flag:
+        if config.disp_lim != 0:
+            send_data_str = self.email_data.decode("utf-8")
+            send_data_lines = send_data_str.split("\r\n")
             try:
-                self.print_send_msg(self.email_data.decode("utf-8") + "\r\n.\r\n")
+                if config.disp_lim > 0:
+                    self.print_send_msg("\r\n".join(send_data_lines[:config.disp_lim]))
+                    utils.print_hint("\r\n  more lines are omitted ...\r\n")
+                    print("\r\n".join(send_data_lines[-5:]))
+                else:
+                    self.print_send_msg(send_data_str + "\r\n.\r\n")
+                # self.print_send_msg(self.email_data.decode("utf-8") + "\r\n.\r\n")
             except UnicodeDecodeError as e:
                 utils.print_warning("\tUnicodeDecodeError found while printing message.")
                 utils.print_warning("\t" + str(e))

@@ -12,7 +12,7 @@ specific_payload = {
             "b64_split_1_eicar",
             "b64_split_2_eicar",
         ],
-        "wncr": {
+        "wncr": [
             "b64_6char_per_line_wncr",
             "b64_junk_char_dot_wncr",
             "b64_junk_char_dash_wncr",
@@ -26,10 +26,10 @@ specific_payload = {
             "b64_split_1_wncr",
             "b64_split_2_wncr",
             "b64_overlong_line_wncr",
-        },
+        ],
     },
     "qp_related": {
-        "eicar": {
+        "eicar": [
             "qp_blank_char_l09_eicar",
             "qp_blank_char_l20_eicar",
             "qp_blank_char_r09_eicar",
@@ -59,8 +59,8 @@ specific_payload = {
             "qp_improper_hex_case_eicar",
             "qp_no_soft_lb_eicar",
             "qp_overlong_line_eicar",
-        },
-        "wncr": {
+        ],
+        "wncr": [
             "qp_blank_char_l09_wncr",
             "qp_blank_char_l20_wncr",
             "qp_blank_char_r09_wncr",
@@ -90,6 +90,6 @@ specific_payload = {
             "qp_improper_hex_case_wncr",
             "qp_no_soft_lb_wncr",
             "qp_overlong_line_wncr",
-        },
+        ],
     },
 }

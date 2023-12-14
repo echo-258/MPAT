@@ -4,9 +4,14 @@ cur_path = os.path.dirname(os.path.abspath(__file__))
 
 mail_server_port = 25
 
-disp_flag = False
-log_flag = False
-log_path = r""
+args_mode = False
+disp_lim = 0        # 0: don't display data  -1: display all data  >0: display first *disp_lim* lines of data
+log_flag = False    # enable logging or not
+log_dir = os.path.join(cur_path, "log")
+if not os.path.exists(log_dir):
+    os.mkdir(log_dir)
+log_name = r""      # the name can be automatically generated if not specified
+log_path = os.path.join(log_dir, log_name)
 
 payload_root_path = os.path.join(cur_path, "sample")
 
