@@ -88,14 +88,15 @@ def main():
         target_list = ["icloud"]
         msg_source = "py"      # to test specific payloads, set this to "payload"
         # case_id_list = list(cases.test_cases.keys())[1:]
-        case_id_list = ["normal_msg"]
-        specified_payload = []
+        # case_id_list = utils.get_cases_span(list(cases.test_cases.keys()), "comment_boundary_app_all", "comment_boundary_half_wrap_end_app_uncom")
+        case_id_list = ["multiple_encoding_valid_prev", "multiple_encoding_valid_latter"]
+        specified_payload = ["basic_qp_eicar"]
         # specified_payload = payload_cases.specific_payload["qp_related"]["wncr"]  # test a batch of specific payloads
         specified_subject = None
         # example: specified_encoding = {"<valid_CTE_here>": "quoted-printable", "<invalid_CTE_here>": "base64"}
         specified_encoding = {"<valid_CTE_here>": "quoted-printable", "<invalid_CTE_here>": "base64"}
         config.disp_lim = -1       # recommend: 20 for long payload. See config.py for more details
-        config.log_flag = True
+        config.log_flag = False
 
     if config.log_flag and config.log_name == "":
         config.log_path = os.path.join(config.log_dir, "sender_log_" + time.strftime("%Y%m%d_%H%M%S", time.localtime()) + ".log")
@@ -110,7 +111,7 @@ def main():
                 continue
             print("\033[94mtesting case: %s ...\n\033[0m" % case)
             msg_main_content = cases.test_cases[case]["data"]
-            msg_main_content = utils.construct_msg_content(msg_main_content, specified_payload, encoding=specified_encoding)
+            msg_main_content = utils.construct_msg_content(case, msg_main_content, specified_payload, encoding=specified_encoding)
             # msg_main_content_with_payload = utils.insert_payload(msg_main_content, specified_payload)
             for target in target_list:
                 print("\033[94mtesting target mailbox: %s ...\n\033[0m" % target)
@@ -120,7 +121,7 @@ def main():
         for pld in specified_payload:
             print("\033[94mtesting payload: %s ...\n\033[0m" % pld)
             msg_main_content = cases.test_cases["generic_structure"]["data"]
-            msg_main_content = utils.construct_msg_content(msg_main_content, [pld], pld, specified_encoding)
+            msg_main_content = utils.construct_msg_content(pld, msg_main_content, [pld], pld, specified_encoding)
             for target in target_list:
                 print("\033[94mtesting target mailbox: %s ...\n\033[0m" % target)
                 execute_sending(sender_token, target, msg_main_content)
@@ -128,7 +129,7 @@ def main():
     elif msg_source == "eml":   # currently not well-developed
         eml_path = ""
         msg_main_content = utils.get_main_content(eml_path)
-        msg_main_content = utils.construct_msg_content(msg_main_content, specified_payload)
+        msg_main_content = utils.construct_msg_content("att_name", msg_main_content, specified_payload)
         # msg_main_content_with_payload = utils.insert_payload(msg_main_content, specified_payload)
         for target in target_list:
             print("\033[94mtesting target mailbox: %s ...\n\033[0m" % target)

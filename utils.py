@@ -78,12 +78,28 @@ def insert_payload(msg_content, specified_payload):
     return msg_content
 
 
-def construct_msg_content(msg, payload, subjcet=None, encoding={}):
+def construct_msg_content(test_id: str, msg, payload, subject=None, encoding={}):
     subject_flag = b"<specified_Subject_here>"
-    if subjcet is not None:
-        msg = msg.replace(subject_flag, subjcet.encode())
+    filename_flag = b"<FILENAME>"
+    if subject is not None:
+        msg = msg.replace(subject_flag, subject.encode())
     for ecd_label, ecd in encoding.items():
         msg = msg.replace(ecd_label.encode(), ecd.encode())
+    filename_flag_cnt = msg.count(filename_flag)
+    for i in range(1, filename_flag_cnt + 1):
+        msg = msg.replace(filename_flag, (test_id + "-att" + str(i)).encode(), 1)
     msg_with_payload = insert_payload(msg, payload)
     return msg_with_payload
+
+
+def get_cases_span(case_list, start_case, end_case):
+    if start_case not in case_list or end_case not in case_list:
+        print_warning("case not found in case list")
+        exit(-1)
+    start_idx = case_list.index(start_case)
+    end_idx = case_list.index(end_case)
+    if start_idx > end_idx:
+        print_warning("invalid case span")
+        exit(-1)
+    return case_list[start_idx:end_idx + 1]
 
