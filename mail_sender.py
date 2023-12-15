@@ -4,7 +4,7 @@ import ssl
 import re
 import config
 import utils
-import base64
+import signal
 
 try:
     from StringIO import StringIO  ## for Python 2
@@ -25,6 +25,7 @@ class MailSender(object):
         self.tls_socket = None
 
         self.err_msg = ""
+        self.unfinished_flag = False
 
     def set_param(self, mail_server, rcpt_to, email_data, helo, mail_from, starttls=False):
         self.mail_server = mail_server
@@ -139,8 +140,6 @@ class MailSender(object):
         print("\033[91m" + ">>> ", end='')
         time.sleep(1)
 
-        timeout = time.time()
-
         msg = ""
         while True:
             line = self.read_line(client_socket)
@@ -154,14 +153,18 @@ class MailSender(object):
             time.sleep(0.1)
         print("\033[0m")
 
-        pattern = re.compile(r"\b5\d{2}\b")
+        pattern = re.compile(r"^[45]\d{2}\b")
         if re.search(pattern, msg):
             self.err_msg += msg
         return msg
 
     def send_email(self):
-        self.establish_socket()
+        timeout = 120       # if a single sending task takes more than 2 minutes, it will be considered as unfinished
+        signal.signal(signal.SIGALRM, self.signal_handler)
+        signal.alarm(timeout)
+
         try:
+            self.establish_socket()
             if self.starttls == True:
                 self.send_smtp_cmds(self.tls_socket)
                 self.send_quit_cmd(self.tls_socket)
@@ -169,11 +172,23 @@ class MailSender(object):
                 self.send_smtp_cmds(self.client_socket)
                 self.send_quit_cmd(self.client_socket)
             self.close_socket()
+        except TimeoutError as e:
+            self.unfinished_flag = True
+            config.time_out_cnt += 1
+            utils.print_warning("Execution timed out")
+            if config.time_out_cnt >= config.MAX_time_out:
+                utils.print_warning("Too many timeouts, exiting...")
+                exit(-1)
         except Exception as e:
             import traceback
             traceback.print_exc()
+        finally:
+            self.close_socket()
 
-        return self.err_msg
+        return self.err_msg, self.unfinished_flag
+
+    def signal_handler(self, signum, frame):
+        raise TimeoutError("Execution timed out")
 
     def __del__(self):
         self.close_socket()

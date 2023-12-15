@@ -54,16 +54,21 @@ def execute_sending(sender_token, target_token, msg_main_content):
     mail_sender = MailSender()
     mail_sender.set_param((mail_server, mail_server_port), helo=smtp_header_hl, mail_from=smtp_header_mf,
                           rcpt_to=smtp_header_rt, email_data=msg_content)
-    err_msg = mail_sender.send_email()
+    err_msg, unfinished = mail_sender.send_email()
+    if unfinished:
+        # execute sending once and only once
+        utils.print_warning("sending unfinished, will retry after 2 minutes...\n")
+        time.sleep(120)
+        mail_sender.unfinished_flag = False     # reset unfinished flag
+        err_msg, unfinished = mail_sender.send_email()
     if config.log_flag:
-        # get subject from main_content
-        subject = re.findall(b"Subject: (.*)\r\n", msg_content)[0]
+        subject = re.findall(b"Subject: (.*)\r\n", msg_content)[0]  # get subject from main_content
         with open(config.log_path, "a") as fp:
-            # write time
             fp.write(time.strftime("%Y-%m-%d %H:%M:%S ", time.localtime()))
-            # write mf, rt, subject
             fp.write("[" + smtp_header_mf.decode("utf-8") + " -> " + smtp_header_rt.decode("utf-8") + " " + subject.decode("utf-8") + "] ")
-            if err_msg == "":
+            if unfinished:
+                fp.write("TIMEOUT\n")
+            elif err_msg == "":
                 fp.write("success\n")
             else:
                 fp.write(err_msg + "\n")
@@ -86,16 +91,16 @@ def main():
     else:
         sender_token = "vps3"
         target_list = ["icloud"]
-        msg_source = "py"      # to test specific payloads, set this to "payload"
-        # case_id_list = list(cases.test_cases.keys())[1:]
-        # case_id_list = utils.get_cases_span(list(cases.test_cases.keys()), "comment_boundary_app_all", "comment_boundary_half_wrap_end_app_uncom")
-        case_id_list = ["multiple_encoding_valid_prev", "multiple_encoding_valid_latter"]
-        specified_payload = ["basic_qp_eicar"]
-        # specified_payload = payload_cases.specific_payload["qp_related"]["wncr"]  # test a batch of specific payloads
+        msg_source = "payload"      # to test specific payloads, set this to "payload"
+        # case_id_list = list(cases.test_cases.keys())[2:]
+        # case_id_list = utils.get_cases_span(list(cases.test_cases.keys()), "bound_begin_blank_char_quo_sta_app", "ecdw_CTE_part_qp")
+        case_id_list = ["generic_structure"]
+        # specified_payload = ["eicar_eicar"]
+        specified_payload = payload_cases.specific_payload["b64_related"]["wncr"]  # test a batch of specific payloads
         specified_subject = None
         # example: specified_encoding = {"<valid_CTE_here>": "quoted-printable", "<invalid_CTE_here>": "base64"}
-        specified_encoding = {"<valid_CTE_here>": "quoted-printable", "<invalid_CTE_here>": "base64"}
-        config.disp_lim = -1       # recommend: 20 for long payload. See config.py for more details
+        specified_encoding = {"<valid_CTE_here>": "base64", "<invalid_CTE_here>": "quoted-printable"}
+        config.disp_lim = 20       # recommend: 20 for long payload. See config.py for more details
         config.log_flag = False
 
     if config.log_flag and config.log_name == "":
@@ -116,7 +121,7 @@ def main():
             for target in target_list:
                 print("\033[94mtesting target mailbox: %s ...\n\033[0m" % target)
                 execute_sending(sender_token, target, msg_main_content)
-            time.sleep(1.5)
+            time.sleep(config.interval)
     elif msg_source == "payload":
         for pld in specified_payload:
             print("\033[94mtesting payload: %s ...\n\033[0m" % pld)
@@ -125,7 +130,7 @@ def main():
             for target in target_list:
                 print("\033[94mtesting target mailbox: %s ...\n\033[0m" % target)
                 execute_sending(sender_token, target, msg_main_content)
-            time.sleep(1.5)
+            time.sleep(config.interval)
     elif msg_source == "eml":   # currently not well-developed
         eml_path = ""
         msg_main_content = utils.get_main_content(eml_path)
@@ -137,6 +142,9 @@ def main():
 
     end_time = time.time()
     print("Finished.", end_time - start_time, "s")
+    if config.log_flag:
+        with open(config.log_path, "a") as fp:
+            fp.write("\nTime cost: " + str(end_time - start_time) + " s\n")
 
 
 if __name__ == '__main__':

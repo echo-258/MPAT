@@ -2,10 +2,14 @@ import os
 
 cur_path = os.path.dirname(os.path.abspath(__file__))
 
+MAX_time_out = 4
+time_out_cnt = 0
+
 mail_server_port = 25
 
 args_mode = False
 disp_lim = 0        # 0: don't display data  -1: display all data  >0: display first *disp_lim* lines of data
+interval = 2.5
 log_flag = False    # enable logging or not
 log_dir = os.path.join(cur_path, "log")
 if not os.path.exists(log_dir):

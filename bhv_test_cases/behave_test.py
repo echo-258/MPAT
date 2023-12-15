@@ -9,6 +9,26 @@ test_cases = {
         ,
         "description": b"The simplest test case, just to test sending function."
     },
+    "manual_case": {
+        "data":
+            b"MIME-Version: 1.0\r\n"
+            b"Subject: <specified_Subject_here>\r\n"
+            b"Content-Type: multipart/mixed; boundary=foo\r\n"
+            b"\r\n"
+            b"--foo\r\n"
+            b"Content-Type: text/plain\r\n"
+            b"\r\n"
+            b"Email with an attachment.\r\nThis is the main body text part.\r\n"
+            b"--foo\r\n"
+            b"Content-Type: application/octet-stream; name=att\r\n"
+            b"Content-Disposition: attachment; filename=<FILENAME>\r\n"
+            b"Content-Transfer-Encoding: <valid_CTE_here>\r\n"
+            b"\r\n"
+            b"TVqQAAMAAAAEAAAA\r\n"
+            b"--foo--\r\n"
+        ,
+        "description": b""
+    },
     # if encoded sample is blocked in this case, it should not be used in following cases
     "generic_no_encoding": {
         "data":

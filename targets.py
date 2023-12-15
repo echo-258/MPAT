@@ -41,7 +41,7 @@ target_mailbox = {
     },
     "mail_ru": {
         "mx": "mxs.mail.ru",
-    "receiver": b"<echozhang258@mail.ru>",
+        "receiver": b"<echozhang258@mail.ru>",
     },
     "outlook": {
         "mx": "outlook-com.olc.protection.outlook.com",
