@@ -1,11 +1,15 @@
 import os
 import re
 
-import bhv_test_cases.behave_test as cases
+# import bhv_test_cases.behave_test as cases
+import bhv_test_cases.specific_payload as payloads
 
 att_dir = "/Users/zjh/temp/mime_test/outlook_temp"
-ref_original_path = "./att_ref/eicar"
-ref_undecoded_path = "./att_ref/basic_qp_eicar"
+ref_original_path = "./att_ref/wncr"
+ref_undecoded_path = "./att_ref/basic_qp_wncr"
+
+# case_result = {case_id: "" for case_id in list(cases.test_cases.keys())}
+case_result = {case_id: "" for case_id in payloads.specific_payload["qp_related"]["wncr"]}
 
 bypass_subdir = os.path.join(att_dir, "bypass")
 undecoded_subdir = os.path.join(att_dir, "undecoded")
@@ -21,7 +25,6 @@ with open(ref_original_path, "rb") as fp:
 with open(ref_undecoded_path, "rb") as fp:
     ref_undecoded = fp.read()
 
-case_result = {case_id: "" for case_id in list(cases.test_cases.keys())}
 unknown_f_result = {}
 case_result_cnt, unknown_f_result_cnt = 0, 0
 
@@ -44,8 +47,8 @@ for f in file_list:
     if content == ref_original:
         f_result = "bypass"
         os.rename(os.path.join(att_dir, f), os.path.join(bypass_subdir, f))
-    # if content is part of ref_original
-    elif ref_original.find(content) != -1:
+    # if ref_original is part of content
+    elif content.find(ref_original) != -1:
         f_result = "weak_bypass_partial"
         os.rename(os.path.join(att_dir, f), os.path.join(bypass_subdir, f))
     elif content == ref_undecoded:
