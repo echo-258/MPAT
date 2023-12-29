@@ -92,7 +92,7 @@ class MailSender(object):
         client_socket.send(b"data\r\n")
         time.sleep(0.1)
         self.print_send_msg("data\r\n")
-        self.print_recv_msg(client_socket)
+        self.print_recv_msg(client_socket)      # possibly error here, self.err_msg will be updated
 
         client_socket.send(self.email_data + b"\r\n.\r\n")
         time.sleep(0.1)
@@ -159,7 +159,7 @@ class MailSender(object):
         return msg
 
     def send_email(self):
-        timeout = 120       # if a single sending task takes more than 2 minutes, it will be considered as unfinished
+        timeout = 90       # if a single sending task takes more than 2 minutes, it will be considered as unfinished
         signal.signal(signal.SIGALRM, self.signal_handler)
         signal.alarm(timeout)
 
@@ -174,7 +174,6 @@ class MailSender(object):
             self.close_socket()
         except TimeoutError as e:
             self.unfinished_flag = True
-            config.time_out_cnt += 1
             utils.print_warning("Execution timed out")
             if config.time_out_cnt >= config.MAX_time_out:
                 utils.print_warning("Too many timeouts, exiting...")

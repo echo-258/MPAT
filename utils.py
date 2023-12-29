@@ -87,7 +87,7 @@ def construct_msg_content(test_id: str, msg, payload, subject=None, encoding={})
         msg = msg.replace(ecd_label.encode(), ecd.encode())
     filename_flag_cnt = msg.count(filename_flag)
     for i in range(1, filename_flag_cnt + 1):
-        msg = msg.replace(filename_flag, (test_id + "-att" + str(i)).encode(), 1)
+        msg = msg.replace(filename_flag, (test_id + "-att" + str(i) + config.filename_ext).encode(), 1)
     msg_with_payload = insert_payload(msg, payload)
     return msg_with_payload
 

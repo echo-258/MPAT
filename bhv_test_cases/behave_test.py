@@ -24,7 +24,11 @@ test_cases = {
             b"Content-Disposition: attachment; filename=<FILENAME>\r\n"
             b"Content-Transfer-Encoding: <valid_CTE_here>\r\n"
             b"\r\n"
-            b"TVqQAAMAAAAEAAAA\r\n"
+            b"TVqQAAMAAAAEAAAA//8AALgAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\r\n"
+            b"AAAA+AAAAA4fug4AtAnNIbgBTM0hVGhpcyBwcm9ncmFtIGNhbm5vdCBiZSBydW4gaW4gRE9TIG1v\r\n"
+            b"ZGUuDQ0KJAAAAAAAAADgxTrRpKRUgqSkVIKkpFSC37hYgqakVILLu1+CpaRUgie4WoKgpFSCy7te\r\n"
+            b"gq+kVILLu1CCoKRUgmerCYKppFSCpKRVggekVIKSgl+Co6RUgmOiUoKlpFSCUmljaKSkVIIAAAAA\r\n"
+            b"AAAAAAAAAAAAAAAAAAAAAAAAAABQRQAATAEEAEGP50wAAAAAAAAAAOAADwELAQYAAHAAAAAgNQAA\r\n"
             b"--foo--\r\n"
         ,
         "description": b""
@@ -2320,7 +2324,7 @@ test_cases = {
     "null_bound_q": {
         "data":
             b"MIME-Version: 1.0\r\n"
-            b"Subject: null_bound_qq\r\n"
+            b"Subject: null_bound_q\r\n"
             b"Content-Type: multipart/mixed; boundary=\"\r\n"
             b"\r\n"
             b"--\r\n"

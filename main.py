@@ -16,7 +16,7 @@ from mail_sender import MailSender
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-port', '--port', default=None, help="Set mail server port manually. Effective in manual mode only.")
+    parser.add_argument('-port', '--port', default=None)
 
     parser.add_argument('-s', '--sender', default="vps3")
     parser.add_argument('-r', '--receiver', required=True, nargs='*')
@@ -30,6 +30,8 @@ def parse_args():
     parser.add_argument('-d', '--display_data', type=int, default=-1)
     parser.add_argument('-l', '--log', default=False, action='store_true', help="Enable logging")
 
+    parser.add_argument('-n', '--filename_ext', default="")
+
     args = parser.parse_args()
     return args
 
@@ -37,8 +39,8 @@ def parse_args():
 def execute_sending(sender_token, target_token, msg_main_content):
     mail_server = targets.target_mailbox[target_token]["mx"]
     mail_server_port = config.mail_server_port
-    smtp_header_hl = targets.helo_content[sender_token]
-    smtp_header_mf = targets.sender[sender_token]
+    smtp_header_hl = targets.sender[sender_token]["helo"]
+    smtp_header_mf = targets.sender[sender_token]["mf"]
     smtp_header_rt = targets.target_mailbox[target_token]["receiver"]
     # starttls = args.starttls if args.starttls else config['server_mode']['starttls']
 
@@ -54,24 +56,26 @@ def execute_sending(sender_token, target_token, msg_main_content):
     mail_sender = MailSender()
     mail_sender.set_param((mail_server, mail_server_port), helo=smtp_header_hl, mail_from=smtp_header_mf,
                           rcpt_to=smtp_header_rt, email_data=msg_content)
-    err_msg, unfinished = mail_sender.send_email()
-    if unfinished:
-        # execute sending once and only once
-        utils.print_warning("sending unfinished, will retry after 2 minutes...\n")
-        time.sleep(120)
-        mail_sender.unfinished_flag = False     # reset unfinished flag
-        err_msg, unfinished = mail_sender.send_email()
+    mail_sender.send_email()
+    if mail_sender.unfinished_flag:
+        mail_sender.unfinished_flag = False  # reset unfinished flag
+        if mail_sender.err_msg == "":       # timeout with unknown reason
+            config.time_out_cnt += 1
+            # execute sending once and only once
+            utils.print_warning("sending unfinished, will retry after 2 minutes...\n")
+            time.sleep(90)
+            mail_sender.send_email()      # unfinished_flag might be set to True again
     if config.log_flag:
         subject = re.findall(b"Subject: (.*)\r\n", msg_content)[0]  # get subject from main_content
         with open(config.log_path, "a") as fp:
             fp.write(time.strftime("%Y-%m-%d %H:%M:%S ", time.localtime()))
             fp.write("[" + smtp_header_mf.decode("utf-8") + " -> " + smtp_header_rt.decode("utf-8") + " " + subject.decode("utf-8") + "] ")
-            if unfinished:
+            if mail_sender.unfinished_flag:
                 fp.write("TIMEOUT\n")
-            elif err_msg == "":
+            elif mail_sender.err_msg == "":
                 fp.write("success\n")
             else:
-                fp.write(err_msg + "\n")
+                fp.write(mail_sender.err_msg + "\n")
     time.sleep(0.5)
 
 
@@ -88,20 +92,22 @@ def main():
         specified_encoding = args.encoding
         config.disp_lim = args.display_data
         config.log_flag = args.log
+        config.filename_ext = args.filename_ext
     else:
         sender_token = "vps3"
-        target_list = ["icloud"]
-        msg_source = "payload"      # to test specific payloads, set this to "payload"
+        target_list = ["naver"]
+        msg_source = "payload"       # to test specific payloads, set this to "payload"
         # case_id_list = list(cases.test_cases.keys())[2:]
-        # case_id_list = utils.get_cases_span(list(cases.test_cases.keys()), "bound_begin_blank_char_quo_sta_app", "ecdw_CTE_part_qp")
+        # case_id_list = utils.get_cases_span(list(cases.test_cases.keys()), "multiple_type_header_valid_prev_mp", "ecdw_CTE_part_qp")
         case_id_list = ["generic_structure"]
-        # specified_payload = ["eicar_eicar"]
-        specified_payload = payload_cases.specific_payload["b64_related"]["wncr"]  # test a batch of specific payloads
+        # specified_payload = ["b64_eicar"]
+        specified_payload = payload_cases.specific_payload["qp_related"]["wncr"]  # test a batch of specific payloads
         specified_subject = None
         # example: specified_encoding = {"<valid_CTE_here>": "quoted-printable", "<invalid_CTE_here>": "base64"}
-        specified_encoding = {"<valid_CTE_here>": "base64", "<invalid_CTE_here>": "quoted-printable"}
+        specified_encoding = {"<valid_CTE_here>": "quoted-printable", "<invalid_CTE_here>": "base64"}
         config.disp_lim = 20       # recommend: 20 for long payload. See config.py for more details
-        config.log_flag = False
+        config.log_flag = True
+        config.filename_ext = ""
 
     if config.log_flag and config.log_name == "":
         config.log_path = os.path.join(config.log_dir, "sender_log_" + time.strftime("%Y%m%d_%H%M%S", time.localtime()) + ".log")

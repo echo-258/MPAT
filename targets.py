@@ -1,25 +1,15 @@
-helo_content = {
-    "vps3": b"vps3.hostoftroubles.com",
-    "qq": b"qq.com",
-    "vivo": b"vivo.com.cn",
-    "yximgs": b"yximgs.com",
-    "huawei": b"huawei.com",
-    "nflxso": b"nflxso.net",
-    "salesforce": b"salesforce.com",
-    "meeting": b"meeting.tencent.com",
-    "dbg": b"@debug_sender_acl",
-}
-
 sender = {
-    "vps3": b"<echo@vps3.hostoftroubles.com>",
-    "qq": b"<110110110@qq.com>",
-    "vivo": b"<110110110@vivo.com.cn>",
-    "yximgs": b"<110110110@yximgs.com>",
-    "huawei": b"<110110110@huawei.com>",
-    "nflxso": b"<110110110@nflxso.net>",
-    "salesforce": b"<110110110@salesforce.com>",
-    "meeting": b"<110110110@meeting.tencent.com>",
-    "dbg": b"echo@debug_sender_acl",
+    "vps3": {
+        "helo": b"vps3.hostoftroubles.com",
+        "mf": b"<echo@vps3.hostoftroubles.com>",
+    },
+    "google": {
+        "helo": b"google.com",
+        "mf": b"<echo@google.com>",
+    },
+    "dbg": {
+        b"echo@debug_sender_acl",
+    },
 }
 
 target_mailbox = {
@@ -29,7 +19,7 @@ target_mailbox = {
     },
     "thu_email": {
         "mx": "mta0.tsinghua.edu.cn",
-        "receiver": b"<zhangjia23@mails.tsinghua.edu.cn>"
+        "receiver": b"<zhjh23@mails.tsinghua.edu.cn>"
     },
     "gmail": {
         "mx": "gmail-smtp-in.l.google.com",
@@ -90,6 +80,10 @@ target_mailbox = {
     "inbox_lv": {
         "mx": "mx1.inbox.lv",
         "receiver": b"<pengaw666666@inbox.lv>"
+    },
+    "naver": {
+        "mx": "mx2.naver.com",
+        "receiver": b"<pengaw666666@naver.com>"
     },
     "fastmail": {
         "mx": "in1-smtp.messagingengine.com",

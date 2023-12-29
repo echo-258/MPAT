@@ -523,4 +523,24 @@ test_cases = {
         ,
         "description": b"The simplest test case, just to test sending function."
     },
+
+    "smuggling": {
+        "data":
+            b"MIME-Version: 1.0\r\n"
+            b"Subject: hello\r\n"
+            b"\r\n"
+            b"lorem ipsum"
+            b"\n.\r\n"
+            b"MAIL FROM:<jh@google.com>\r\n"
+            b"RCPT TO:<echozhang258@gmail.com>\r\n"
+            b"data\r\n"
+            b"From: <jh@google.com>\r\n"
+            b"To: <echozhang258@gmail.com>\r\n"
+            b"Subject: message 2\r\n"
+            b"\r\n"
+            b"come from google.com\r\n"
+            b".\r\n"
+        ,
+        "description": b""
+    },
 }
