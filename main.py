@@ -95,20 +95,23 @@ def main():
         config.filename_ext = args.filename_ext
     else:
         sender_token = "vps3"
-        target_list = ["naver"]
+        target_list = ["gmail"]
         msg_source = "payload"       # to test specific payloads, set this to "payload"
         # case_id_list = list(cases.test_cases.keys())[2:]
-        # case_id_list = utils.get_cases_span(list(cases.test_cases.keys()), "multiple_type_header_valid_prev_mp", "ecdw_CTE_part_qp")
+        # case_id_list = utils.get_cases_span(list(cases.test_cases.keys()), "header_body_delimit_rn_CTE_body", "ecdw_CTE_part_qp")
         case_id_list = ["generic_structure"]
-        # specified_payload = ["b64_eicar"]
-        specified_payload = payload_cases.specific_payload["qp_related"]["wncr"]  # test a batch of specific payloads
-        specified_subject = None
+        # specified_payload = ["basic_qp_eicar"]
+        specified_payload = payload_cases.specific_payload["b64_related"]["wncr"]  # test a batch of specific payloads
+        # specified_payload = utils.get_cases_span(payload_cases.specific_payload["qp_related"]["wncr"], "qp_line_end_e20e_wncr", "qp_overlong_line_wncr")
+        specified_subject = ""     # "" if don't want to specify subject
         # example: specified_encoding = {"<valid_CTE_here>": "quoted-printable", "<invalid_CTE_here>": "base64"}
-        specified_encoding = {"<valid_CTE_here>": "quoted-printable", "<invalid_CTE_here>": "base64"}
+        specified_encoding = {"<valid_CTE_here>": "base64", "<invalid_CTE_here>": "quoted-printable"}
         config.disp_lim = 20       # recommend: 20 for long payload. See config.py for more details
         config.log_flag = True
         config.filename_ext = ""
 
+    # e.g. subject_ext = 202301051654
+    config.subject_ext = time.strftime("-%Y%m%d%H%M%S", time.localtime())
     if config.log_flag and config.log_name == "":
         config.log_path = os.path.join(config.log_dir, "sender_log_" + time.strftime("%Y%m%d_%H%M%S", time.localtime()) + ".log")
     start_time = time.time()
@@ -122,7 +125,7 @@ def main():
                 continue
             print("\033[94mtesting case: %s ...\n\033[0m" % case)
             msg_main_content = cases.test_cases[case]["data"]
-            msg_main_content = utils.construct_msg_content(case, msg_main_content, specified_payload, encoding=specified_encoding)
+            msg_main_content = utils.construct_msg_content(case, msg_main_content, specified_payload, subject=specified_subject, encoding=specified_encoding)
             # msg_main_content_with_payload = utils.insert_payload(msg_main_content, specified_payload)
             for target in target_list:
                 print("\033[94mtesting target mailbox: %s ...\n\033[0m" % target)
@@ -132,7 +135,7 @@ def main():
         for pld in specified_payload:
             print("\033[94mtesting payload: %s ...\n\033[0m" % pld)
             msg_main_content = cases.test_cases["generic_structure"]["data"]
-            msg_main_content = utils.construct_msg_content(pld, msg_main_content, [pld], pld, specified_encoding)
+            msg_main_content = utils.construct_msg_content(pld, msg_main_content, [pld], subject=specified_subject, encoding=specified_encoding)
             for target in target_list:
                 print("\033[94mtesting target mailbox: %s ...\n\033[0m" % target)
                 execute_sending(sender_token, target, msg_main_content)

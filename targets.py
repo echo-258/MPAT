@@ -15,7 +15,8 @@ sender = {
 target_mailbox = {
     "whu_email": {
         "mx": "mx-whu-edu-cn.icoremail.net",
-        "receiver": b"<cse2019echo@whu.edu.cn>",
+        # "receiver": b"<2019302180042@whu.edu.cn>",
+        "receiver": b"<2019302180168@whu.edu.cn>",
     },
     "thu_email": {
         "mx": "mta0.tsinghua.edu.cn",
@@ -23,7 +24,7 @@ target_mailbox = {
     },
     "gmail": {
         "mx": "gmail-smtp-in.l.google.com",
-        "receiver": b"<echozhang258@gmail.com>",
+        "receiver": b"<heathzhi@gmail.com>",
     },
     "icloud": {
         "mx": "mx01.mail.icloud.com",
@@ -51,11 +52,11 @@ target_mailbox = {
     },
     "netease_mail": {
         "mx": "163mx01.mxmail.netease.com",
-        "receiver": b"<maxwellkang@163.com>",
+        "receiver": b"<echozhang258@163.com>",
     },
     "qq_mail": {
         "mx": "mx2.qq.com",
-        "receiver": b"<1379664023@qq.com>",
+        "receiver": b"<echozhang258@qq.com>",
     },
     "sina_mail": {
         "mx": "freemx1.sinamail.sina.com.cn",
@@ -73,7 +74,7 @@ target_mailbox = {
         "mx": "sohumx.h.a.sohu.com",
         "receiver": b"<pengaw666666@sohu.com>"
     },
-    "sapo": {
+    "sapo_pt": {
         "mx": "mx.ptmail.sapo.pt",
         "receiver": b"<pengaw666666@sapo.pt>"
     },
@@ -88,17 +89,35 @@ target_mailbox = {
     "fastmail": {
         "mx": "in1-smtp.messagingengine.com",
         # "receiver": b"<echozhang@fastmail.com>",
-        "receiver": b"<echozhang_00@fastmail.com>",
+        "receiver": b"<echozhang765@fastmail.com>",
         "paid": "True"
+    },
+    "freemail_hu": {
+        "mx": "fmx.freemail.hu",
+        "receiver": b"<volonte_zhy@freemail.hu>"
+    },
+    "yandex": {
+        "mx": "mx.yandex.ru",
+        "receiver": b"<volontezhy@yandex.com>"
+    },
+    "tutanota": {
+        "mx": "mail.tutanota.de",
+        "receiver": b"<echozhang258@tutanota.com>"
+    },
+    "yahoo": {
+        "mx": "mta5.am0.yahoodns.net",
+        "receiver": b"<hack.allof@yahoo.com>"
+    },
+    "aliyun": {
+        "mx": "mx2.mail.aliyun.com",
+        "receiver": b"<hackallof@aliyun.com>"
     },
     "gmail_inbox": {},
     "yeah_net": {},
-    "yahoo_com": {},
     "aol_com": {},
     "hotmail_com": {},
     "runbox_com": {},
     "hushmail": {},
-    "yandex_mail": {},
     "mailjet": {},
     "rediffmail_com": {},
     "seznam_cz": {},
@@ -118,7 +137,6 @@ target_mailbox = {
     "wp_pl": {},
     "t-online_de": {},
     "excite_com": {},
-    "freemail_hu": {},
 
     "hey_com": {},
     "lockbin": {},

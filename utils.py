@@ -78,11 +78,13 @@ def insert_payload(msg_content, specified_payload):
     return msg_content
 
 
-def construct_msg_content(test_id: str, msg, payload, subject=None, encoding={}):
-    subject_flag = b"<specified_Subject_here>"
+def construct_msg_content(test_id: str, msg, payload, subject="", encoding={}):
+    subject_flag = b"<SUBJECT>"
     filename_flag = b"<FILENAME>"
-    if subject is not None:
+    if subject != "":
         msg = msg.replace(subject_flag, subject.encode())
+    else:
+        msg = msg.replace(subject_flag, (test_id + config.subject_ext).encode())
     for ecd_label, ecd in encoding.items():
         msg = msg.replace(ecd_label.encode(), ecd.encode())
     filename_flag_cnt = msg.count(filename_flag)

@@ -5,6 +5,7 @@ unsorted_cases/
 sender_kit/
 static_save/
 eml_cases/
+log/
 
 sample_script/ascii-jar-master/
 sample_script/ascii-jar-master.zip
@@ -15,3 +16,4 @@ sample_script/compress.py
 test.py
 sender_log*
 ATTENTION !!!
+*.bak
